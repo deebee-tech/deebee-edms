@@ -1,0 +1,53 @@
+{
+	"$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+	"version": "0.2",
+	"language": "en,es",
+	"import": [
+		"@cspell/dict-es-es/cspell-ext.json"
+	],
+	"useGitignore": true,
+	"ignorePaths": [
+		"compose.yaml",
+		"pnpm-lock.yaml",
+		"package-lock.json",
+		"yarn.lock",
+		"bun.lock",
+		"bun.lockb",
+		"node_modules",
+		".svelte-kit",
+		"build",
+		".output",
+		"static",
+		"src/lib/paraglide",
+		"project.inlang/cache",
+		"test-results",
+		"playwright-report",
+		".env.*"
+	],
+	"words": [
+		"deebee",
+		"deebeetech",
+		"edms",
+		"esbuild",
+		"figtree",
+		"fontsource",
+		"hugeicons",
+		"inlang",
+		"maia",
+		"mdsvex",
+		"oklch",
+		"outdir",
+		"paraglide",
+		"postgres",
+		"Postgrest",
+		"Stylesheet",
+		"supabase",
+		"sveltejs",
+		"sveltekit",
+		"tailwindcss",
+		"vercel",
+		"vite",
+		"vitest",
+		"Weatherby"
+	]
+}

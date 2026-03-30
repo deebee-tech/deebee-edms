@@ -1,0 +1,6 @@
+---
+globs: *.sql
+alwaysApply: false
+---
+
+This project uses Supabase and Postgres. Please use that dialect.
