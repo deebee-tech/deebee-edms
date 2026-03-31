@@ -1,23 +1,18 @@
 <script lang="ts">
-	import { resolve } from "$app/paths";
-	import { page } from "$app/state";
-	import type { PathnameWithSearchOrHash } from "$app/types";
 	import favicon from "$lib/assets/favicon.svg";
-	import { locales, localizeHref } from "$lib/paraglide/runtime";
 	import { ClerkProvider } from "svelte-clerk";
 	import "./layout.css";
 
-	let { children } = $props();
+	let { children, data } = $props();
 </script>
 
-<svelte:head><link rel="icon" href={favicon} /></svelte:head>
+<svelte:head><link rel="icon" href={data.favicon ?? favicon} /></svelte:head>
 
-<ClerkProvider>
+<ClerkProvider
+	localization={{
+		signIn: { start: { title: data.authPageTitleSignIn } },
+		signUp: { start: { title: data.authPageTitleSignUp } },
+	}}
+>
 	{@render children()}
-
-	<div style="display:none">
-		{#each locales as locale, index (index)}
-			<a href={resolve(localizeHref(page.url.pathname, { locale }) as PathnameWithSearchOrHash)}>{locale}</a>
-		{/each}
-	</div>
 </ClerkProvider>

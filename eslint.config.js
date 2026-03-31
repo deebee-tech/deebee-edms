@@ -12,6 +12,7 @@ const gitignorePath = path.resolve(import.meta.dirname, ".gitignore");
 
 export default defineConfig(
 	includeIgnoreFile(gitignorePath),
+	{ ignores: ["docs/.vitepress/cache/**"] },
 	js.configs.recommended,
 	ts.configs.recommended,
 	svelte.configs.recommended,
@@ -34,6 +35,13 @@ export default defineConfig(
 				parser: ts.parser,
 				svelteConfig,
 			},
+		},
+	},
+	{
+		files: ["src/lib/components/ui/button/button.svelte"],
+		rules: {
+			// Generic anchor `href` comes from props; rule only understands literals / resolve() — not bindable URLs.
+			"svelte/no-navigation-without-resolve": ["error", { ignoreLinks: true }],
 		},
 	},
 );

@@ -1,10 +1,6 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import {
-	getProjectRefFromEnv,
-	linkedProjectRefPath,
-	projectRoot,
-} from "./supabase_project_ref.ts";
+import { getProjectRefFromEnv, linkedProjectRefPath, projectRoot } from "./supabase_project_ref.ts";
 
 /**
  * Records the project ref from PUBLIC_SUPABASE_URL for Supabase CLI defaults

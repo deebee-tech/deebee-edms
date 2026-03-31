@@ -14,10 +14,7 @@ export function loadDotEnv(filePath: string): Record<string, string> {
 		if (eq === -1) continue;
 		const key = t.slice(0, eq).trim();
 		let val = t.slice(eq + 1).trim();
-		if (
-			(val.startsWith('"') && val.endsWith('"')) ||
-			(val.startsWith("'") && val.endsWith("'"))
-		) {
+		if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
 			val = val.slice(1, -1);
 		}
 		out[key] = val;
@@ -55,9 +52,7 @@ export function getProjectRefFromEnv(): string {
 	}
 	const m = /^([a-z0-9]{20})\.supabase\.co$/i.exec(hostname);
 	if (!m) {
-		console.error(
-			`Expected PUBLIC_SUPABASE_URL host like <project-ref>.supabase.co (20-char ref), got: ${hostname}`,
-		);
+		console.error(`Expected PUBLIC_SUPABASE_URL host like <project-ref>.supabase.co (20-char ref), got: ${hostname}`);
 		process.exit(1);
 	}
 	return m[1].toLowerCase();
@@ -94,9 +89,7 @@ export function tryGetDbPushUrlFromEnv(): string | null {
 	const url = (env.SUPABASE_DB_URL ?? env.DATABASE_URL ?? "").trim();
 	if (!url) return null;
 	if (!/^postgres(ql)?:\/\//i.test(url)) {
-		console.error(
-			"SUPABASE_DB_URL / DATABASE_URL must be a postgres:// or postgresql:// connection string.",
-		);
+		console.error("SUPABASE_DB_URL / DATABASE_URL must be a postgres:// or postgresql:// connection string.");
 		process.exit(1);
 	}
 	return url;
