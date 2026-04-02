@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { cn } from "$lib/utils";
-	import { useStepperNav } from "./stepper.svelte.js";
-	import type { StepperNavProps } from "./types";
+	import { useStepperNav } from "$lib/components/ui/stepper/stepper.svelte.js";
+	import type { StepperNavProps } from "$lib/components/ui/stepper/types";
 	import { box } from "svelte-toolbelt";
 
 	let { orientation = "horizontal", class: className, children, ...rest }: StepperNavProps = $props();

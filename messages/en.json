@@ -1,5 +1,11 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"auth_title_sign_in": "Sign-In to DeeBee EDMS",
-	"auth_title_sign_up": "Create Your DeeBee EDMS Account"
+	"auth_title_sign_up": "Create Your DeeBee EDMS Account",
+	"theme_light": "Light",
+	"theme_dark": "Dark",
+	"theme_system": "System",
+	"theme_toggle": "Toggle theme",
+	"language_en": "English",
+	"language_es": "Spanish"
 }

@@ -1,13 +1,13 @@
-import Root from "./stepper.svelte";
-import Nav from "./stepper-nav.svelte";
-import Item from "./stepper-item.svelte";
-import Trigger from "./stepper-trigger.svelte";
-import Indicator from "./stepper-indicator.svelte";
-import Separator from "./stepper-separator.svelte";
-import Title from "./stepper-title.svelte";
-import Description from "./stepper-description.svelte";
-import Next from "./stepper-next.svelte";
-import Previous from "./stepper-previous.svelte";
+import Root from "$lib/components/ui/stepper/stepper.svelte";
+import Nav from "$lib/components/ui/stepper/stepper-nav.svelte";
+import Item from "$lib/components/ui/stepper/stepper-item.svelte";
+import Trigger from "$lib/components/ui/stepper/stepper-trigger.svelte";
+import Indicator from "$lib/components/ui/stepper/stepper-indicator.svelte";
+import Separator from "$lib/components/ui/stepper/stepper-separator.svelte";
+import Title from "$lib/components/ui/stepper/stepper-title.svelte";
+import Description from "$lib/components/ui/stepper/stepper-description.svelte";
+import Next from "$lib/components/ui/stepper/stepper-next.svelte";
+import Previous from "$lib/components/ui/stepper/stepper-previous.svelte";
 
 export {
 	Root,

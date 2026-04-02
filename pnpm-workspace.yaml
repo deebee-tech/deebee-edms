@@ -1,4 +1,7 @@
 onlyBuiltDependencies:
   - "@clerk/shared"
+  - bufferutil
+  - core-js
   - esbuild
   - supabase
+  - utf-8-validate

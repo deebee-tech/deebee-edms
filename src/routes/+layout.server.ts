@@ -1,5 +1,4 @@
 import { env } from "$env/dynamic/public";
-import { m } from "$lib/paraglide/messages";
 import { supabase } from "$lib/supabase.client";
 import { redirect } from "@sveltejs/kit";
 import { buildClerkProps } from "svelte-clerk/server";
@@ -44,8 +43,8 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 
 	return {
 		...buildClerkProps(locals.auth()),
-		authPageTitleSignIn: authPageTitleSignIn ?? m.auth_title_sign_in(),
-		authPageTitleSignUp: authPageTitleSignUp ?? m.auth_title_sign_up(),
+		authPageTitleSignIn: authPageTitleSignIn,
+		authPageTitleSignUp: authPageTitleSignUp,
 		favicon,
 		organizationSettings,
 	};

@@ -1,14 +1,17 @@
 <script lang="ts">
 	import { cn } from "$lib/utils";
-	import { box } from "svelte-toolbelt";
-	import { useStepperItem } from "./stepper.svelte.js";
-	import type { StepperItemProps } from "./types";
+	import { useStepperItem } from "$lib/components/ui/stepper/stepper.svelte.js";
+	import type { StepperItemProps } from "$lib/components/ui/stepper/types";
 
 	const uid = $props.id();
 
 	let { id = uid, class: className, children, ...rest }: StepperItemProps = $props();
 
-	const stepperItemState = useStepperItem({ id: box.with(() => id) });
+	const stepperItemState = useStepperItem({
+		get id() {
+			return id;
+		},
+	});
 </script>
 
 <div

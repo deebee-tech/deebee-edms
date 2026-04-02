@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { box, mergeProps } from "svelte-toolbelt";
-	import { useStepperStepButton } from "./stepper.svelte.js";
-	import type { StepperNextButtonProps } from "./types";
-	import { Button } from "../button";
+	import { useStepperStepButton } from "$lib/components/ui/stepper/stepper.svelte.js";
+	import type { StepperNextButtonProps } from "$lib/components/ui/stepper/types";
+	import { Button } from "$lib/components/ui/button";
 
 	let {
 		disabled = false,

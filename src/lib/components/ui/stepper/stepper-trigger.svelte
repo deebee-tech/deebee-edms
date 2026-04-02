@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { HTMLButtonAttributes } from "svelte/elements";
-	import { useStepperItemTrigger } from "./stepper.svelte.js";
+	import { useStepperItemTrigger } from "$lib/components/ui/stepper/stepper.svelte.js";
 	import { box, type WithElementRef } from "svelte-toolbelt";
 	import { cn } from "$lib/utils.js";
 

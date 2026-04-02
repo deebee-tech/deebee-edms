@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { cn } from "$lib/utils";
 	import type { HTMLAttributes } from "svelte/elements";
-	import { useStepperSeparator } from "./stepper.svelte.js";
+	import { useStepperSeparator } from "$lib/components/ui/stepper/stepper.svelte.js";
 
 	let { class: className, children, ...rest }: HTMLAttributes<HTMLDivElement> = $props();
 
