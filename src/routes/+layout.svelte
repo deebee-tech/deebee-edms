@@ -3,7 +3,7 @@
 	import { m } from "$lib/paraglide/messages";
 	import { getLocale } from "$lib/paraglide/runtime";
 	import { ui } from "@clerk/ui";
-	import { ModeWatcher } from "mode-watcher";
+	import { ModeWatcher, mode } from "mode-watcher";
 	import { ClerkProvider } from "svelte-clerk";
 	import "./layout.css";
 
@@ -30,7 +30,17 @@
 	});
 </script>
 
-<svelte:head><link rel="icon" href={data.favicon ?? "/images/favicon.ico"} /></svelte:head>
+<svelte:head>
+	<link rel="icon" href={data.favicon ?? "/favicon.ico"} />
+	<link rel="icon" type="image/png" sizes="32x32" href={data.favicon32 ?? "/favicon-32x32.png"} />
+	<link rel="icon" type="image/png" sizes="16x16" href={data.favicon16 ?? "/favicon-16x16.png"} />
+	<link rel="apple-touch-icon" sizes="180x180" href={data.appleTouchIcon ?? "/apple-touch-icon.png"} />
+	<link rel="manifest" href="/site.webmanifest" />
+	<meta
+		name="theme-color"
+		content={mode.current === "dark" ? (data.themeColorDark ?? "#171717") : (data.themeColorLight ?? "#faf8f6")}
+	/>
+</svelte:head>
 
 <ModeWatcher />
 <ClerkProvider {ui} localization={clerkLocalization}>

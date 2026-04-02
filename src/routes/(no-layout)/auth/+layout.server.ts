@@ -4,25 +4,11 @@ import type { LayoutServerLoad } from "./$types";
 export const load: LayoutServerLoad = async ({ parent }) => {
 	const { organizationSettings } = await parent();
 
-	const authBackgroundColor: string | undefined = organizationSettings.find(
-		(os) => os.settings_key === "auth_background_color",
-	)?.settings_value;
-
-	const authPrimaryColor: string | undefined = organizationSettings.find(
-		(os) => os.settings_key === "auth_primary_color",
-	)?.settings_value;
-
-	const authLogo: string | undefined = organizationSettings.find(
-		(os) => os.settings_key === "auth_logo",
-	)?.settings_value;
-
-	const authLogoWidth: string | undefined = organizationSettings.find(
-		(os) => os.settings_key === "auth_logo_width",
-	)?.settings_value;
-
-	const authLogoHeight: string | undefined = organizationSettings.find(
-		(os) => os.settings_key === "auth_logo_height",
-	)?.settings_value;
+	const authBackgroundColor = organizationSettings["auth_background_color"];
+	const authPrimaryColor = organizationSettings["auth_primary_color"];
+	const authLogo = organizationSettings["auth_logo"];
+	const authLogoWidth = organizationSettings["auth_logo_width"];
+	const authLogoHeight = organizationSettings["auth_logo_height"];
 
 	return {
 		authBackgroundColor,

@@ -3,19 +3,34 @@
 	import { ClerkLoaded } from "svelte-clerk";
 
 	let { children, data } = $props();
+	let layoutEl: HTMLDivElement | undefined = $state();
+	let cardReady = $state(false);
+
+	$effect(() => {
+		if (!layoutEl) return;
+
+		const check = () => (cardReady = !!layoutEl!.querySelector(".cl-card"));
+		check();
+
+		const observer = new MutationObserver(check);
+		observer.observe(layoutEl, { childList: true, subtree: true });
+		return () => observer.disconnect();
+	});
 </script>
 
 <ClerkLoaded>
 	<div
+		bind:this={layoutEl}
 		id="auth-layout"
-		class="flex h-screen w-screen flex-col items-center justify-center"
+		class="flex h-screen w-screen flex-col items-center justify-center
+			{cardReady ? 'opacity-100 transition-opacity duration-100' : 'opacity-0'}"
 		style="background-color: {data.authBackgroundColor ??
 			'var(--background)'};--clerk-primary-color: {data.authPrimaryColor ??
 			'var(--primary)'};--clerk-card-color: var(--card);"
 	>
 		<div class="mb-8" style="width: {data.authLogoWidth ?? '84px'}; height: {data.authLogoHeight ?? '84px'};">
 			<img
-				src={(data.authLogo ?? mode.current === "dark") ? "/images/bee_logo_dark.png" : "/images/bee_logo_light.png"}
+				src={(data.authLogo ?? mode.current === "dark") ? "/bee_logo_dark.png" : "/bee_logo_light.png"}
 				alt="auth logo"
 			/>
 		</div>

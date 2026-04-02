@@ -8,7 +8,7 @@ const SCHEMAS = ["deebee_edms"];
 
 const ref = getProjectRefFromEnv();
 const bin = supabaseCliPath();
-const outFile = join(projectRoot(), "src", "lib", "database.types.ts");
+const outFile = join(projectRoot(), "src", "lib", "database", "supabase.types.ts");
 
 const schemaArgs = SCHEMAS.flatMap((s) => ["--schema", s]);
 const result = spawnSync(bin, ["gen", "types", "typescript", "--project-id", ref, ...schemaArgs], {
