@@ -7,18 +7,19 @@
 <script lang="ts">
 	import { buttonVariants } from "$lib/components/ui/button/index.js";
 	import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
+	import { m } from "$lib/paraglide/messages";
+	import { cn } from "$lib/utils";
 	import CheckIcon from "@lucide/svelte/icons/check";
 	import ComputerIcon from "@lucide/svelte/icons/computer";
 	import MoonIcon from "@lucide/svelte/icons/moon";
 	import SunIcon from "@lucide/svelte/icons/sun";
-	import { m } from "$lib/paraglide/messages";
 	import { resetMode, setMode, userPrefersMode } from "mode-watcher";
 
 	let { variant = "outline" }: ThemeSelectorProps = $props();
 </script>
 
 <DropdownMenu.Root>
-	<DropdownMenu.Trigger class={buttonVariants({ variant, size: "icon" })}>
+	<DropdownMenu.Trigger class={cn(buttonVariants({ variant, size: "icon" }), "cursor-pointer")}>
 		<SunIcon class="scale-100 rotate-0 transition-all! dark:scale-0 dark:-rotate-90" />
 		<MoonIcon class="absolute scale-0 rotate-90 transition-all! dark:scale-100 dark:rotate-0" />
 		<span class="sr-only">{m.theme_toggle()}</span>

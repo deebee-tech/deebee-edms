@@ -1,30 +1,31 @@
 <script lang="ts">
-	import GlobeIcon from "@lucide/svelte/icons/globe";
-	import CheckIcon from "@lucide/svelte/icons/check";
-	import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
 	import { buttonVariants } from "$lib/components/ui/button";
-	import { cn } from "$lib/utils.js";
+	import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
 	import { Flag } from "$lib/components/ui/flag";
+	import { getDefaultLanguages } from "$lib/components/ui/language-switcher/defaults";
 	import type { LanguageSwitcherProps } from "$lib/components/ui/language-switcher/types";
+	import { getLocale, isLocale, setLocale } from "$lib/paraglide/runtime";
+	import { cn } from "$lib/utils.js";
+	import CheckIcon from "@lucide/svelte/icons/check";
+	import GlobeIcon from "@lucide/svelte/icons/globe";
 
 	let {
-		languages = [],
-		value = $bindable(""),
+		languages = getDefaultLanguages(),
+		value = $bindable(getLocale()),
 		align = "end",
 		variant = "outline",
-		onChange,
+		onChange = (code: string) => {
+			if (isLocale(code)) setLocale(code);
+		},
 		class: className,
 	}: LanguageSwitcherProps = $props();
-
-	$effect(() => {
-		if (value === "" && languages.length > 0) {
-			value = languages[0].code;
-		}
-	});
 </script>
 
 <DropdownMenu.Root>
-	<DropdownMenu.Trigger class={cn(buttonVariants({ variant, size: "icon" }), className)} aria-label="Change language">
+	<DropdownMenu.Trigger
+		class={cn(buttonVariants({ variant, size: "icon" }), "cursor-pointer", className)}
+		aria-label="Change language"
+	>
 		<GlobeIcon class="size-4" />
 		<span class="sr-only">Change language</span>
 	</DropdownMenu.Trigger>

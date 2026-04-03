@@ -8,8 +8,8 @@ export type Language = {
 };
 
 export type LanguageSwitcherProps = {
-	/** List of available languages */
-	languages: Language[];
+	/** List of available languages (defaults to paraglide locales if omitted) */
+	languages?: Language[];
 
 	/** Current selected language code */
 	value?: string;

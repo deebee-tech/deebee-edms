@@ -40,6 +40,7 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 
 	return {
 		...buildClerkProps(locals.auth()),
+		appCookies: locals.appCookies,
 		authPageTitleSignIn,
 		authPageTitleSignUp,
 		favicon,

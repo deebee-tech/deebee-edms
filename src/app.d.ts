@@ -3,7 +3,9 @@
 declare global {
 	namespace App {
 		// interface Error {}
-		// interface Locals {}
+		interface Locals {
+			appCookies: import("$lib/stores/cookies.svelte").AppCookies;
+		}
 		// interface PageData {}
 		// interface PageState {}
 		// interface Platform {}

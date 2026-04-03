@@ -1,13 +1,26 @@
+<script lang="ts" module>
+	import { type Locale } from "$lib/paraglide/runtime";
+	import { esES } from "@clerk/localizations";
+	import type { LocalizationResource } from "@clerk/shared/types";
+
+	const CLERK_LOCALE_MAP: Partial<Record<Locale, LocalizationResource>> = {
+		es: esES,
+	};
+</script>
+
 <script lang="ts">
-	import { CLERK_LOCALE_MAP } from "$lib/constants";
 	import { m } from "$lib/paraglide/messages";
 	import { getLocale } from "$lib/paraglide/runtime";
+	import { CookieStore, setCookieStore } from "$lib/stores/cookies.svelte";
 	import { ui } from "@clerk/ui";
 	import { ModeWatcher, mode } from "mode-watcher";
 	import { ClerkProvider } from "svelte-clerk";
 	import "./layout.css";
 
 	let { children, data } = $props();
+
+	const cookieStore = new CookieStore(() => data.appCookies);
+	setCookieStore(cookieStore);
 
 	const clerkLocale = $derived(CLERK_LOCALE_MAP[getLocale()] ?? {});
 

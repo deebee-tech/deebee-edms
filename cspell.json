@@ -2,9 +2,7 @@
 	"$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
 	"version": "0.2",
 	"language": "en,es",
-	"import": [
-		"@cspell/dict-es-es/cspell-ext.json"
-	],
+	"import": ["@cspell/dict-es-es/cspell-ext.json"],
 	"useGitignore": true,
 	"ignorePaths": [
 		"compose.yaml",
