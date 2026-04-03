@@ -3,24 +3,24 @@
 	import { ClerkLoaded } from "svelte-clerk";
 
 	let { children, data } = $props();
-	let layoutEl: HTMLDivElement | undefined = $state();
+	let cardElement: HTMLDivElement | undefined = $state();
 	let cardReady = $state(false);
 
 	$effect(() => {
-		if (!layoutEl) return;
+		if (!cardElement) return;
 
-		const check = () => (cardReady = !!layoutEl!.querySelector(".cl-card"));
+		const check = () => (cardReady = !!cardElement!.querySelector(".cl-card"));
 		check();
 
 		const observer = new MutationObserver(check);
-		observer.observe(layoutEl, { childList: true, subtree: true });
+		observer.observe(cardElement, { childList: true, subtree: true });
 		return () => observer.disconnect();
 	});
 </script>
 
 <ClerkLoaded>
 	<div
-		bind:this={layoutEl}
+		bind:this={cardElement}
 		id="auth-layout"
 		class="flex h-screen w-screen flex-col items-center justify-center
 			{cardReady ? 'opacity-100 transition-opacity duration-100' : 'opacity-0'}"

@@ -5,12 +5,12 @@ import type { RequestHandler } from "./$types";
 export const GET: RequestHandler = async ({ locals }) => {
 	const settings: Record<string, string> = {};
 
-	const { userId } = locals.auth();
-	if (userId) {
+	const { orgId } = locals.auth();
+	if (orgId) {
 		const { data, error } = await supabase
 			.from("organizations")
 			.select(`organization_settings(settings_key, settings_value)`)
-			.eq("organization_identifier", userId);
+			.eq("organization_identifier", orgId);
 
 		if (!error && data) {
 			for (const setting of data) {
@@ -26,18 +26,18 @@ export const GET: RequestHandler = async ({ locals }) => {
 		short_name: settings["app_short_name"] ?? "",
 		icons: [
 			{
-				src: settings["android_chrome_192"] ?? "/android-chrome-192x192.png",
+				src: settings["icon_android_chrome_192"] ?? "/android-chrome-192x192.png",
 				sizes: "192x192",
 				type: "image/png",
 			},
 			{
-				src: settings["android_chrome_512"] ?? "/android-chrome-512x512.png",
+				src: settings["icon_android_chrome_512"] ?? "/android-chrome-512x512.png",
 				sizes: "512x512",
 				type: "image/png",
 			},
 		],
-		theme_color: settings["theme_color"] ?? "#ffffff",
-		background_color: settings["background_color"] ?? "#ffffff",
+		theme_color: settings["color_theme_color_light"] ?? "#faf8f6",
+		background_color: settings["color_theme_color_light"] ?? "#faf8f6",
 		display: "standalone" as const,
 	};
 
