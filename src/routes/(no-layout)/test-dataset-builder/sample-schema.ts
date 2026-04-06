@@ -1,0 +1,113 @@
+import type { SchemaTable } from "$lib/datasets/types";
+
+export const sampleSchema: SchemaTable[] = [
+	{
+		schema: "public",
+		name: "employees",
+		type: "table",
+		columns: [
+			{ name: "id", dataType: "integer", nullable: false, isPrimaryKey: true, defaultValue: "nextval('employees_id_seq')" },
+			{ name: "first_name", dataType: "character varying", nullable: false, isPrimaryKey: false },
+			{ name: "last_name", dataType: "character varying", nullable: false, isPrimaryKey: false },
+			{ name: "email", dataType: "character varying", nullable: false, isPrimaryKey: false },
+			{ name: "department_id", dataType: "integer", nullable: true, isPrimaryKey: false },
+			{ name: "manager_id", dataType: "integer", nullable: true, isPrimaryKey: false },
+			{ name: "hire_date", dataType: "date", nullable: false, isPrimaryKey: false },
+			{ name: "salary", dataType: "numeric", nullable: false, isPrimaryKey: false },
+			{ name: "is_active", dataType: "boolean", nullable: false, isPrimaryKey: false, defaultValue: "true" },
+		],
+		foreignKeys: [
+			{ columnName: "department_id", referencedTable: "departments", referencedColumn: "id" },
+			{ columnName: "manager_id", referencedTable: "employees", referencedColumn: "id" },
+		],
+	},
+	{
+		schema: "public",
+		name: "departments",
+		type: "table",
+		columns: [
+			{ name: "id", dataType: "integer", nullable: false, isPrimaryKey: true, defaultValue: "nextval('departments_id_seq')" },
+			{ name: "name", dataType: "character varying", nullable: false, isPrimaryKey: false },
+			{ name: "code", dataType: "character varying", nullable: false, isPrimaryKey: false },
+			{ name: "location", dataType: "character varying", nullable: true, isPrimaryKey: false },
+			{ name: "budget", dataType: "numeric", nullable: true, isPrimaryKey: false },
+			{ name: "created_at", dataType: "timestamp with time zone", nullable: false, isPrimaryKey: false, defaultValue: "now()" },
+		],
+		foreignKeys: [],
+	},
+	{
+		schema: "public",
+		name: "titles",
+		type: "table",
+		columns: [
+			{ name: "id", dataType: "integer", nullable: false, isPrimaryKey: true, defaultValue: "nextval('titles_id_seq')" },
+			{ name: "employee_id", dataType: "integer", nullable: false, isPrimaryKey: false },
+			{ name: "title", dataType: "character varying", nullable: false, isPrimaryKey: false },
+			{ name: "from_date", dataType: "date", nullable: false, isPrimaryKey: false },
+			{ name: "to_date", dataType: "date", nullable: true, isPrimaryKey: false },
+		],
+		foreignKeys: [
+			{ columnName: "employee_id", referencedTable: "employees", referencedColumn: "id" },
+		],
+	},
+	{
+		schema: "public",
+		name: "salary_history",
+		type: "table",
+		columns: [
+			{ name: "id", dataType: "integer", nullable: false, isPrimaryKey: true, defaultValue: "nextval('salary_history_id_seq')" },
+			{ name: "employee_id", dataType: "integer", nullable: false, isPrimaryKey: false },
+			{ name: "amount", dataType: "numeric", nullable: false, isPrimaryKey: false },
+			{ name: "effective_date", dataType: "date", nullable: false, isPrimaryKey: false },
+			{ name: "reason", dataType: "character varying", nullable: true, isPrimaryKey: false },
+		],
+		foreignKeys: [
+			{ columnName: "employee_id", referencedTable: "employees", referencedColumn: "id" },
+		],
+	},
+	{
+		schema: "public",
+		name: "projects",
+		type: "table",
+		columns: [
+			{ name: "id", dataType: "integer", nullable: false, isPrimaryKey: true },
+			{ name: "name", dataType: "character varying", nullable: false, isPrimaryKey: false },
+			{ name: "department_id", dataType: "integer", nullable: true, isPrimaryKey: false },
+			{ name: "start_date", dataType: "date", nullable: false, isPrimaryKey: false },
+			{ name: "end_date", dataType: "date", nullable: true, isPrimaryKey: false },
+			{ name: "status", dataType: "character varying", nullable: false, isPrimaryKey: false, defaultValue: "'active'" },
+		],
+		foreignKeys: [
+			{ columnName: "department_id", referencedTable: "departments", referencedColumn: "id" },
+		],
+	},
+	{
+		schema: "public",
+		name: "project_assignments",
+		type: "table",
+		columns: [
+			{ name: "id", dataType: "integer", nullable: false, isPrimaryKey: true },
+			{ name: "project_id", dataType: "integer", nullable: false, isPrimaryKey: false },
+			{ name: "employee_id", dataType: "integer", nullable: false, isPrimaryKey: false },
+			{ name: "role", dataType: "character varying", nullable: true, isPrimaryKey: false },
+			{ name: "assigned_date", dataType: "date", nullable: false, isPrimaryKey: false },
+		],
+		foreignKeys: [
+			{ columnName: "project_id", referencedTable: "projects", referencedColumn: "id" },
+			{ columnName: "employee_id", referencedTable: "employees", referencedColumn: "id" },
+		],
+	},
+	{
+		schema: "public",
+		name: "employee_directory",
+		type: "view",
+		columns: [
+			{ name: "full_name", dataType: "text", nullable: true, isPrimaryKey: false },
+			{ name: "email", dataType: "character varying", nullable: false, isPrimaryKey: false },
+			{ name: "department", dataType: "character varying", nullable: true, isPrimaryKey: false },
+			{ name: "title", dataType: "character varying", nullable: true, isPrimaryKey: false },
+			{ name: "hire_date", dataType: "date", nullable: false, isPrimaryKey: false },
+		],
+		foreignKeys: [],
+	},
+];

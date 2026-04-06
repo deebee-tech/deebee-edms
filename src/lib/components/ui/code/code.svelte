@@ -32,7 +32,7 @@
 </div>
 
 <style lang="postcss">
-	@reference '../../../../app.css';
+	@reference '../../../../routes/layout.css';
 
 	:global(.dark) {
 		:global(.shiki, .shiki span) {
