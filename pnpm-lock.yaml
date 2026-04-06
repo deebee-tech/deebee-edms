@@ -203,6 +203,9 @@ importers:
       svelte-clerk:
         specifier: ^1.1.1
         version: 1.1.1(@sveltejs/kit@2.55.0(@sveltejs/vite-plugin-svelte@7.0.0(svelte@5.55.1)(vite@8.0.3(@types/node@24.12.0)(esbuild@0.27.4)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)))(svelte@5.55.1)(typescript@5.9.3)(vite@8.0.3(@types/node@24.12.0)(esbuild@0.27.4)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(svelte@5.55.1)
+      svelte-dnd-action:
+        specifier: ^0.9.69
+        version: 0.9.69(svelte@5.55.1)
       svelte-easy-crop:
         specifier: ^5.0.1
         version: 5.0.1(svelte@5.55.1)
@@ -239,6 +242,9 @@ importers:
       typescript-eslint:
         specifier: ^8.58.0
         version: 8.58.0(eslint@10.1.0(jiti@2.6.1))(typescript@5.9.3)
+      valibot:
+        specifier: ^1.3.1
+        version: 1.3.1(typescript@5.9.3)
       vaul-svelte:
         specifier: 1.0.0-next.7
         version: 1.0.0-next.7(svelte@5.55.1)
@@ -4814,6 +4820,11 @@ packages:
     peerDependenciesMeta:
       '@sveltejs/kit':
         optional: true
+
+  svelte-dnd-action@0.9.69:
+    resolution: {integrity: sha512-NAmSOH7htJoYraTQvr+q5whlIuVoq88vEuHr4NcFgscDRUxfWPPxgie2OoxepBCQCikrXZV4pqV86aun60wVyw==}
+    peerDependencies:
+      svelte: '>=3.23.0 || ^5.0.0-next.0'
 
   svelte-easy-crop@5.0.1:
     resolution: {integrity: sha512-Dq2rgmPsSEo+K8k49TFGXZAJwJa537AR6hW1RqKEdYj7QKlc4Ya7l4VlSYWlOV8/uAiQ10VyGRdSVAUcZiMwjg==}
@@ -10269,6 +10280,10 @@ snapshots:
       - react
       - react-dom
 
+  svelte-dnd-action@0.9.69(svelte@5.55.1):
+    dependencies:
+      svelte: 5.55.1
+
   svelte-easy-crop@5.0.1(svelte@5.55.1):
     dependencies:
       svelte: 5.55.1
@@ -10604,7 +10619,6 @@ snapshots:
   valibot@1.3.1(typescript@5.9.3):
     optionalDependencies:
       typescript: 5.9.3
-    optional: true
 
   validator@13.15.26:
     optional: true

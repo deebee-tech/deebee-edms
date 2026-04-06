@@ -1,4 +1,3 @@
-import { env } from "$env/dynamic/public";
 import { supabase } from "$lib/database/supabase.client";
 import { redirect } from "@sveltejs/kit";
 import { buildClerkProps } from "svelte-clerk/server";
@@ -30,9 +29,11 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 	const themeColorLight = organizationSettings["color_theme_color_light"];
 	const themeColorDark = organizationSettings["color_theme_color_dark"];
 
+	/*
 	if (!userId && !url.pathname.startsWith("/auth")) {
 		return redirect(307, env.PUBLIC_CLERK_SIGN_IN_URL);
 	}
+	*/
 
 	if (userId && url.pathname === "/") {
 		return redirect(307, "/app");

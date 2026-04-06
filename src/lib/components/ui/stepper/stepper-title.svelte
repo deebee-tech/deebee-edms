@@ -8,7 +8,7 @@
 <div
 	data-slot="stepper-title"
 	class={cn(
-		"text-lg font-medium",
+		"text-sm font-medium",
 		"group-data-[orientation=vertical]/stepper-nav:text-left",
 		"group-data-[orientation=horizontal]/stepper-nav:text-center",
 		className,
