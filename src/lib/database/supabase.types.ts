@@ -64,6 +64,135 @@ export type Database = {
 				};
 				Relationships: [];
 			};
+			workflow_run_steps: {
+				Row: {
+					completed_at: string | null;
+					error: string | null;
+					id: string;
+					input: Json | null;
+					node_id: string;
+					node_type: string;
+					output: Json | null;
+					run_id: string;
+					started_at: string;
+					status: string;
+				};
+				Insert: {
+					completed_at?: string | null;
+					error?: string | null;
+					id?: string;
+					input?: Json | null;
+					node_id: string;
+					node_type: string;
+					output?: Json | null;
+					run_id: string;
+					started_at?: string;
+					status?: string;
+				};
+				Update: {
+					completed_at?: string | null;
+					error?: string | null;
+					id?: string;
+					input?: Json | null;
+					node_id?: string;
+					node_type?: string;
+					output?: Json | null;
+					run_id?: string;
+					started_at?: string;
+					status?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "workflow_run_steps_runs";
+						columns: ["run_id"];
+						isOneToOne: false;
+						referencedRelation: "workflow_runs";
+						referencedColumns: ["id"];
+					},
+				];
+			};
+			workflow_runs: {
+				Row: {
+					completed_at: string | null;
+					error: string | null;
+					global_state: Json;
+					id: string;
+					started_at: string;
+					status: string;
+					workflow_id: string;
+				};
+				Insert: {
+					completed_at?: string | null;
+					error?: string | null;
+					global_state?: Json;
+					id?: string;
+					started_at?: string;
+					status?: string;
+					workflow_id: string;
+				};
+				Update: {
+					completed_at?: string | null;
+					error?: string | null;
+					global_state?: Json;
+					id?: string;
+					started_at?: string;
+					status?: string;
+					workflow_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "workflow_runs_workflows";
+						columns: ["workflow_id"];
+						isOneToOne: false;
+						referencedRelation: "workflows";
+						referencedColumns: ["id"];
+					},
+				];
+			};
+			workflows: {
+				Row: {
+					created_at: string;
+					definition: Json;
+					description: string | null;
+					id: string;
+					is_active: boolean;
+					name: string;
+					organization_id: number;
+					updated_at: string;
+					version: number;
+				};
+				Insert: {
+					created_at?: string;
+					definition?: Json;
+					description?: string | null;
+					id?: string;
+					is_active?: boolean;
+					name: string;
+					organization_id: number;
+					updated_at?: string;
+					version?: number;
+				};
+				Update: {
+					created_at?: string;
+					definition?: Json;
+					description?: string | null;
+					id?: string;
+					is_active?: boolean;
+					name?: string;
+					organization_id?: number;
+					updated_at?: string;
+					version?: number;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "workflows_organizations";
+						columns: ["organization_id"];
+						isOneToOne: false;
+						referencedRelation: "organizations";
+						referencedColumns: ["id"];
+					},
+				];
+			};
 		};
 		Views: {
 			[_ in never]: never;
