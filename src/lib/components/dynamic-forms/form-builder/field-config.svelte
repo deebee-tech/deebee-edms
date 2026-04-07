@@ -8,6 +8,7 @@
 	import { Textarea } from "$lib/components/shadcn-svelte/textarea";
 	import PlusIcon from "@lucide/svelte/icons/plus";
 	import TrashIcon from "@lucide/svelte/icons/trash";
+	import { NON_INTERACTIVE_TYPES } from "../types";
 	import type { FormFieldDefinition } from "../types";
 
 	let {
@@ -16,11 +17,30 @@
 		field: FormFieldDefinition;
 	} = $props();
 
+	const isNonInteractive = $derived(NON_INTERACTIVE_TYPES.has(field.type));
 	const hasOptions = $derived(field.type === "select" || field.type === "radio");
 	const hasTextValidation = $derived(
-		["text", "email", "password", "textarea", "phone", "richtext", "otp"].includes(field.type),
+		["text", "email", "password", "textarea", "phone", "richtext", "code", "otp"].includes(field.type),
 	);
 	const hasNumberValidation = $derived(field.type === "number" || field.type === "slider");
+	const hasCodeConfig = $derived(field.type === "code");
+	const hasStaticTextConfig = $derived(field.type === "static_text");
+	const hasVideoConfig = $derived(field.type === "video");
+
+	const codeLanguages = [
+		{ label: "JavaScript", value: "javascript" },
+		{ label: "TypeScript", value: "typescript" },
+		{ label: "JSON", value: "json" },
+		{ label: "SQL", value: "sql" },
+		{ label: "HTML", value: "html" },
+		{ label: "CSS", value: "css" },
+		{ label: "Python", value: "python" },
+		{ label: "Markdown", value: "markdown" },
+		{ label: "XML", value: "xml" },
+		{ label: "YAML", value: "yaml" },
+		{ label: "Shell", value: "shell" },
+		{ label: "Plain Text", value: "plaintext" },
+	] as const;
 
 	function addOption() {
 		const idx = (field.options?.length ?? 0) + 1;
@@ -66,7 +86,7 @@
 				</Field.Content>
 			</Field.Field>
 
-			{#if field.type !== "checkbox" && field.type !== "switch" && field.type !== "slider"}
+			{#if !isNonInteractive && field.type !== "checkbox" && field.type !== "switch" && field.type !== "slider" && field.type !== "code"}
 				<Field.Field>
 					<Field.Label>Placeholder</Field.Label>
 					<Field.Content>
@@ -89,15 +109,17 @@
 	<div>
 		<h4 class="mb-3 text-sm font-semibold">Behavior</h4>
 		<div class="space-y-3">
-			<Field.Field orientation="horizontal">
-				<Checkbox bind:checked={() => field.required ?? false, (v) => (field.required = v)} />
-				<Field.Label>Required</Field.Label>
-			</Field.Field>
+			{#if !isNonInteractive}
+				<Field.Field orientation="horizontal">
+					<Checkbox bind:checked={() => field.required ?? false, (v) => (field.required = v)} />
+					<Field.Label>Required</Field.Label>
+				</Field.Field>
 
-			<Field.Field orientation="horizontal">
-				<Checkbox bind:checked={() => field.disabled ?? false, (v) => (field.disabled = v)} />
-				<Field.Label>Disabled</Field.Label>
-			</Field.Field>
+				<Field.Field orientation="horizontal">
+					<Checkbox bind:checked={() => field.disabled ?? false, (v) => (field.disabled = v)} />
+					<Field.Label>Disabled</Field.Label>
+				</Field.Field>
+			{/if}
 
 			<Field.Field>
 				<Field.Label>Width</Field.Label>
@@ -147,6 +169,117 @@
 					<PlusIcon class="mr-2 size-4" />
 					Add Option
 				</Button>
+			</div>
+		</div>
+	{/if}
+
+	{#if hasStaticTextConfig}
+		<Separator />
+		<div>
+			<h4 class="mb-3 text-sm font-semibold">Content</h4>
+			<div class="space-y-3">
+				<Field.Field>
+					<Field.Label>HTML Content</Field.Label>
+					<Field.Content>
+						<Textarea
+							value={(field.config?.content as string) ?? ""}
+							placeholder="Enter text or HTML content..."
+							rows={6}
+							oninput={(e) => {
+								field.config = { ...field.config, content: e.currentTarget.value };
+							}}
+						/>
+						<Field.Description>Supports plain text and HTML markup</Field.Description>
+					</Field.Content>
+				</Field.Field>
+			</div>
+		</div>
+	{/if}
+
+	{#if hasVideoConfig}
+		<Separator />
+		<div>
+			<h4 class="mb-3 text-sm font-semibold">Video</h4>
+			<div class="space-y-3">
+				<Field.Field>
+					<Field.Label>Video URL</Field.Label>
+					<Field.Content>
+						<Input
+							value={(field.config?.url as string) ?? ""}
+							placeholder="https://youtube.com/watch?v=... or direct video URL"
+							oninput={(e) => {
+								field.config = { ...field.config, url: e.currentTarget.value };
+							}}
+						/>
+						<Field.Description>YouTube URLs and direct video file URLs are supported</Field.Description>
+					</Field.Content>
+				</Field.Field>
+
+				<Field.Field orientation="horizontal">
+					<Checkbox
+						checked={!!field.config?.requireWatch}
+						onCheckedChange={(v) => {
+							field.config = { ...field.config, requireWatch: v };
+						}}
+					/>
+					<div>
+						<Field.Label>Require Watch</Field.Label>
+						<Field.Description>User must watch the video before submitting</Field.Description>
+					</div>
+				</Field.Field>
+
+				{#if field.config?.requireWatch}
+					<Field.Field>
+						<Field.Label>Watch Threshold (%)</Field.Label>
+						<Field.Content>
+							<Input
+								type="number"
+								min={1}
+								max={100}
+								value={(field.config?.watchThreshold as number) ?? 95}
+								oninput={(e) => {
+									const v = parseInt(e.currentTarget.value);
+									field.config = {
+										...field.config,
+										watchThreshold: isNaN(v) ? 95 : Math.min(100, Math.max(1, v)),
+									};
+								}}
+							/>
+							<Field.Description>Percentage of the video that must be watched (high watermark)</Field.Description>
+						</Field.Content>
+					</Field.Field>
+				{/if}
+			</div>
+		</div>
+	{/if}
+
+	{#if hasCodeConfig}
+		<Separator />
+		<div>
+			<h4 class="mb-3 text-sm font-semibold">Code Editor</h4>
+			<div class="space-y-3">
+				<Field.Field>
+					<Field.Label>Language</Field.Label>
+					<Field.Content>
+						<Select.Root
+							type="single"
+							bind:value={
+								() => (field.config?.language as string) ?? "javascript",
+								(v) => (field.config = { ...field.config, language: v })
+							}
+						>
+							<Select.Trigger>
+								{codeLanguages.find((l) => l.value === ((field.config?.language as string) ?? "javascript"))?.label ??
+									"JavaScript"}
+							</Select.Trigger>
+							<Select.Content>
+								{#each codeLanguages as lang (lang.value)}
+									<Select.Item value={lang.value} label={lang.label} />
+								{/each}
+							</Select.Content>
+						</Select.Root>
+					</Field.Content>
+				</Field.Field>
 			</div>
 		</div>
 	{/if}

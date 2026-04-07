@@ -10,3 +10,8 @@ export { default as TagsField } from "./tags-field.svelte";
 export { default as FileField } from "./file-field.svelte";
 export { default as SliderField } from "./slider-field.svelte";
 export { default as OtpField } from "./otp-field.svelte";
+export { default as RichtextField } from "./richtext-field.svelte";
+export { default as CodeField } from "./code-field.svelte";
+export { default as StaticTextField } from "./static-text-field.svelte";
+export { default as DividerField } from "./divider-field.svelte";
+export { default as VideoField } from "./video-field.svelte";

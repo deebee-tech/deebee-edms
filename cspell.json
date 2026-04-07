@@ -55,6 +55,7 @@
 		"inlang",
 		"jsrepo",
 		"layerchart",
+		"lightningcss",
 		"longblob",
 		"longtext",
 		"maia",
@@ -63,6 +64,7 @@
 		"mediumint",
 		"mediumtext",
 		"medtext",
+		"monaco",
 		"mssql",
 		"msword",
 		"multistep",
@@ -129,6 +131,7 @@
 		"varbinary",
 		"vaul",
 		"vercel",
+		"videojs",
 		"virt",
 		"vite",
 		"vitepress",
@@ -138,6 +141,8 @@
 		"wordprocessingml",
 		"xyflow",
 		"yeezy",
+		"youtu",
+		"youtube",
 		"zxcvbn"
 	]
 }

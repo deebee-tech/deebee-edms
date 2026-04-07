@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { FilterBuilderDialog, type ColumnMeta, type ColumnType, type FilterGroup } from "$lib/components/filter-builder";
+	import {
+		FilterBuilderDialog,
+		type ColumnMeta,
+		type ColumnType,
+		type FilterGroup,
+	} from "$lib/components/filter-builder";
 	import FullscreenContainer from "$lib/components/fullscreen-container.svelte";
 	import { Button } from "$lib/components/shadcn-svelte/button";
 	import { Handle, Pane, PaneGroup } from "$lib/components/shadcn-svelte/resizable";
@@ -403,11 +408,7 @@
 										{/if}
 									</div>
 									<div class="min-h-0 flex-1">
-										<FieldGrid
-											fields={datasetFields}
-											tables={datasetTables}
-											onfieldschange={handleFieldsChange}
-										/>
+										<FieldGrid fields={datasetFields} tables={datasetTables} onfieldschange={handleFieldsChange} />
 									</div>
 								</div>
 							</div>

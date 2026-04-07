@@ -16,9 +16,27 @@ export const FIELD_TYPES = [
 	"otp",
 	"color",
 	"richtext",
+	"code",
+	"static_text",
+	"divider",
+	"video",
 ] as const;
 
 export type FieldType = (typeof FIELD_TYPES)[number];
+
+export const NON_INTERACTIVE_TYPES: ReadonlySet<FieldType> = new Set(["static_text", "divider", "video"]);
+
+export interface VideoWatchData {
+	progress: number;
+	ended: boolean;
+	watchedSeconds: number;
+	totalSeconds: number;
+}
+
+export function isFieldNonInteractive(field: FormFieldDefinition): boolean {
+	if (field.type === "video") return !field.config?.requireWatch;
+	return NON_INTERACTIVE_TYPES.has(field.type);
+}
 
 export interface FieldOption {
 	label: string;
@@ -46,6 +64,7 @@ export interface FormFieldDefinition {
 	defaultValue?: unknown;
 	options?: FieldOption[];
 	validation?: FieldValidation;
+	config?: Record<string, unknown>;
 	width?: "full" | "half" | "1/3" | "2/3" | "1/4" | "3/4";
 }
 

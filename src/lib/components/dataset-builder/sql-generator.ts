@@ -40,10 +40,7 @@ function quoteIdentifier(name: string, delimiters: { begin: string; end: string 
 	return `${delimiters.begin}${name}${delimiters.end}`;
 }
 
-function resolveFilterColumn(
-	compositeKey: string,
-	tables: DatasetTable[],
-): { alias: string; column: string } {
+function resolveFilterColumn(compositeKey: string, tables: DatasetTable[]): { alias: string; column: string } {
 	const sepIdx = compositeKey.indexOf(":");
 	if (sepIdx === -1) return { alias: compositeKey, column: compositeKey };
 	const tableId = compositeKey.slice(0, sepIdx);
@@ -67,8 +64,7 @@ function applyColumnFilter(
 	const { alias, column: col } = resolveFilterColumn(filter.column, tables);
 	const val = filter.value;
 	const escaped = () => String(val).replace(/'/g, "''");
-	const quotedCol = () =>
-		`${quoteIdentifier(alias, delimiters)}.${quoteIdentifier(col, delimiters)}`;
+	const quotedCol = () => `${quoteIdentifier(alias, delimiters)}.${quoteIdentifier(col, delimiters)}`;
 	const likeOp = dbType === DatabaseType.Postgres ? "ILIKE" : "LIKE";
 
 	const mapped = filterOperatorMap[filter.operator] ?? null;

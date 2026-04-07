@@ -15,10 +15,14 @@ import SlidersHorizontalIcon from "@lucide/svelte/icons/sliders-horizontal";
 import KeyboardIcon from "@lucide/svelte/icons/keyboard";
 import PaletteIcon from "@lucide/svelte/icons/palette";
 import TextIcon from "@lucide/svelte/icons/text";
+import CodeIcon from "@lucide/svelte/icons/code";
+import TextQuoteIcon from "@lucide/svelte/icons/text-quote";
+import MinusIcon from "@lucide/svelte/icons/minus";
+import PlayIcon from "@lucide/svelte/icons/play";
 import type { Component } from "svelte";
 import type { FieldType, FormFieldDefinition } from "./types";
 
-export type FieldCategory = "basic" | "choice" | "advanced" | "special";
+export type FieldCategory = "basic" | "choice" | "advanced" | "special" | "layout";
 
 export interface FieldRegistryEntry {
 	label: string;
@@ -141,6 +145,30 @@ export const fieldRegistry: Record<FieldType, FieldRegistryEntry> = {
 		category: "special",
 		defaults: { placeholder: "Enter rich text..." },
 	},
+	code: {
+		label: "Code Editor",
+		icon: CodeIcon,
+		category: "special",
+		defaults: { config: { language: "javascript" } },
+	},
+	static_text: {
+		label: "Static Text",
+		icon: TextQuoteIcon,
+		category: "layout",
+		defaults: { config: { content: "" } },
+	},
+	divider: {
+		label: "Divider",
+		icon: MinusIcon,
+		category: "layout",
+		defaults: {},
+	},
+	video: {
+		label: "Video Player",
+		icon: PlayIcon,
+		category: "layout",
+		defaults: { config: { url: "" } },
+	},
 };
 
 export const fieldCategories: Record<FieldCategory, string> = {
@@ -148,4 +176,5 @@ export const fieldCategories: Record<FieldCategory, string> = {
 	choice: "Choice",
 	advanced: "Advanced",
 	special: "Special",
+	layout: "Layout",
 };

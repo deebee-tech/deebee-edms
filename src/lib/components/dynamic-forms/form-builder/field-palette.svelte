@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button } from "$lib/components/shadcn-svelte/button";
-	import { fieldCategories, fieldRegistry, type FieldCategory } from "../field-registry";
+	import { fieldCategories, fieldRegistry, type FieldCategory, type FieldRegistryEntry } from "../field-registry";
 	import { FIELD_TYPES, type FieldType } from "../types";
 
 	let {
@@ -9,13 +9,13 @@
 		onadd: (type: FieldType) => void;
 	} = $props();
 
+	type PaletteItem = { type: FieldType; entry: FieldRegistryEntry };
+
 	const grouped = $derived.by(() => {
-		const groups: Record<FieldCategory, { type: FieldType; entry: (typeof fieldRegistry)[FieldType] }[]> = {
-			basic: [],
-			choice: [],
-			advanced: [],
-			special: [],
-		};
+		const groups = {} as Record<FieldCategory, PaletteItem[]>;
+		for (const cat of Object.keys(fieldCategories) as FieldCategory[]) {
+			groups[cat] = [];
+		}
 		for (const type of FIELD_TYPES) {
 			const entry = fieldRegistry[type];
 			groups[entry.category].push({ type, entry });

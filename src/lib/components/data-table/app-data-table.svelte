@@ -73,7 +73,7 @@
 	const _initColOrder: ColumnOrderState = (() => {
 		const defs = columnDefs;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		return defs.map((col) => col.id ?? (col as any).accessorKey as string).filter(Boolean);
+		return defs.map((col) => col.id ?? ((col as any).accessorKey as string)).filter(Boolean);
 	})();
 	let columnOrder = $state<ColumnOrderState>(_initColOrder);
 
@@ -309,30 +309,33 @@
 									ondragstart={(e: DragEvent) => handleDragStart(e, colId)}
 									ondragover={(e: DragEvent) => handleDragOver(e, colId)}
 									ondrop={(e: DragEvent) => handleDrop(e)}
-									ondragleave={() => { dropTargetId = null; dropSide = null; }}
+									ondragleave={() => {
+										dropTargetId = null;
+										dropSide = null;
+									}}
 									ondragend={() => resetDragState()}
 								>
-								{#if !header.isPlaceholder}
-									<div class="flex items-center">
-										{#if header.column.getCanSort()}
-											<button
-												class="flex cursor-pointer items-center gap-1 text-muted-foreground hover:text-foreground"
-												onclick={() => header.column.toggleSorting()}
-											>
+									{#if !header.isPlaceholder}
+										<div class="flex items-center">
+											{#if header.column.getCanSort()}
+												<button
+													class="flex cursor-pointer items-center gap-1 text-muted-foreground hover:text-foreground"
+													onclick={() => header.column.toggleSorting()}
+												>
+													<FlexRender content={header.column.columnDef.header} context={header.getContext()} />
+													{#if header.column.getIsSorted() === "asc"}
+														<ArrowUpIcon class="size-3.5" />
+													{:else if header.column.getIsSorted() === "desc"}
+														<ArrowDownIcon class="size-3.5" />
+													{:else}
+														<ArrowUpDownIcon class="size-3.5 opacity-50" />
+													{/if}
+												</button>
+											{:else}
 												<FlexRender content={header.column.columnDef.header} context={header.getContext()} />
-												{#if header.column.getIsSorted() === "asc"}
-													<ArrowUpIcon class="size-3.5" />
-												{:else if header.column.getIsSorted() === "desc"}
-													<ArrowDownIcon class="size-3.5" />
-												{:else}
-													<ArrowUpDownIcon class="size-3.5 opacity-50" />
-												{/if}
-											</button>
-										{:else}
-											<FlexRender content={header.column.columnDef.header} context={header.getContext()} />
-										{/if}
-									</div>
-								{/if}
+											{/if}
+										</div>
+									{/if}
 								</Table.Head>
 							{/each}
 							{#if actions}

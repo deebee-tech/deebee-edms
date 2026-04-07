@@ -99,7 +99,12 @@
 	}
 </script>
 
-<div class="flex h-full min-h-0 flex-col overflow-hidden" role="presentation" ondragover={handleDragOver} ondrop={handleDrop}>
+<div
+	class="flex h-full min-h-0 flex-col overflow-hidden"
+	role="presentation"
+	ondragover={handleDragOver}
+	ondrop={handleDrop}
+>
 	<div class="flex shrink-0 items-center justify-between border-b px-3 py-1.5">
 		<h4 class="text-xs font-semibold">Fields</h4>
 		<Button variant="ghost" size="sm" class="h-6 text-xs" onclick={addEmptyField}>
@@ -168,7 +173,7 @@
 											sortDirection: val === "" ? undefined : (val as "asc" | "desc"),
 										})}
 								>
-									<Select.Trigger class="h-6 w-[80%] min-w-0 max-w-full justify-between text-xs">
+									<Select.Trigger class="h-6 w-[80%] max-w-full min-w-0 justify-between text-xs">
 										{sortOptions.find((o) => o.value === (field.sortDirection ?? ""))?.label ?? "None"}
 									</Select.Trigger>
 									<Select.Content>
@@ -189,7 +194,7 @@
 											aggregation: val === "" ? undefined : (val as DatasetField["aggregation"]),
 										})}
 								>
-									<Select.Trigger class="h-6 w-[80%] min-w-0 max-w-full justify-between text-xs">
+									<Select.Trigger class="h-6 w-[80%] max-w-full min-w-0 justify-between text-xs">
 										{aggregationOptions.find((o) => o.value === (field.aggregation ?? ""))?.label ?? "None"}
 									</Select.Trigger>
 									<Select.Content>

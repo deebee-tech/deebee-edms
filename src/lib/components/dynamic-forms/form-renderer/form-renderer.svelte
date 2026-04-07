@@ -8,7 +8,7 @@
 	import { valibotClient } from "sveltekit-superforms/adapters";
 	import * as v from "valibot";
 	import { createStepValibotSchema, createValibotSchema, isMultiStep } from "../schema";
-	import type { FormDefinition, FormFieldDefinition } from "../types";
+	import type { FormDefinition, FormFieldDefinition, VideoWatchData } from "../types";
 	import CheckboxField from "./fields/checkbox-field.svelte";
 	import DateField from "./fields/date-field.svelte";
 	import FileField from "./fields/file-field.svelte";
@@ -21,6 +21,11 @@
 	import SwitchField from "./fields/switch-field.svelte";
 	import TagsField from "./fields/tags-field.svelte";
 	import TextareaField from "./fields/textarea-field.svelte";
+	import RichtextField from "./fields/richtext-field.svelte";
+	import CodeField from "./fields/code-field.svelte";
+	import StaticTextField from "./fields/static-text-field.svelte";
+	import DividerField from "./fields/divider-field.svelte";
+	import VideoField from "./fields/video-field.svelte";
 
 	let {
 		definition,
@@ -113,8 +118,22 @@
 				errors={fieldErrors(field.name)}
 				{disabled}
 			/>
-		{:else if field.type === "textarea" || field.type === "richtext"}
+		{:else if field.type === "textarea"}
 			<TextareaField
+				{field}
+				bind:value={() => $formData[field.name] as string, (val) => ($formData[field.name] = val)}
+				errors={fieldErrors(field.name)}
+				{disabled}
+			/>
+		{:else if field.type === "richtext"}
+			<RichtextField
+				{field}
+				bind:value={() => $formData[field.name] as string, (val) => ($formData[field.name] = val)}
+				errors={fieldErrors(field.name)}
+				{disabled}
+			/>
+		{:else if field.type === "code"}
+			<CodeField
 				{field}
 				bind:value={() => $formData[field.name] as string, (val) => ($formData[field.name] = val)}
 				errors={fieldErrors(field.name)}
@@ -190,6 +209,29 @@
 				errors={fieldErrors(field.name)}
 				{disabled}
 			/>
+		{:else if field.type === "static_text"}
+			<StaticTextField {field} />
+		{:else if field.type === "divider"}
+			<DividerField {field} />
+		{:else if field.type === "video"}
+			{#if field.config?.requireWatch}
+				<VideoField
+					{field}
+					bind:value={
+						() =>
+							($formData[field.name] as VideoWatchData) ?? {
+								progress: 0,
+								ended: false,
+								watchedSeconds: 0,
+								totalSeconds: 0,
+							},
+						(val) => ($formData[field.name] = val)
+					}
+					errors={fieldErrors(field.name)}
+				/>
+			{:else}
+				<VideoField {field} />
+			{/if}
 		{/if}
 	</div>
 {/snippet}

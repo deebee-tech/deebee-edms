@@ -1,5 +1,6 @@
 import * as v from "valibot";
 import type { FormDefinition, FormFieldDefinition, FormStepDefinition } from "./types";
+import { isFieldNonInteractive } from "./types";
 
 type AnySchema = v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>;
 
@@ -24,6 +25,7 @@ function buildFieldSchema(field: FormFieldDefinition): AnySchema {
 		case "phone":
 		case "color":
 		case "richtext":
+		case "code":
 		case "date": {
 			const pipes: v.PipeItem<string, string, v.BaseIssue<unknown>>[] = [];
 			if (field.required) pipes.push(v.minLength(1, `${field.label} is required`));
@@ -79,6 +81,19 @@ function buildFieldSchema(field: FormFieldDefinition): AnySchema {
 		case "file":
 			return v.optional(v.any());
 
+		case "video": {
+			const threshold = ((field.config?.watchThreshold as number) ?? 95) / 100;
+			return v.object({
+				progress: v.pipe(
+					v.number(),
+					v.minValue(threshold, `Please watch at least ${Math.round(threshold * 100)}% of the video`),
+				),
+				ended: v.boolean(),
+				watchedSeconds: v.number(),
+				totalSeconds: v.number(),
+			});
+		}
+
 		default:
 			return v.optional(v.string(), "");
 	}
@@ -87,6 +102,7 @@ function buildFieldSchema(field: FormFieldDefinition): AnySchema {
 export function createValibotSchema(definition: FormDefinition) {
 	const shape: Record<string, AnySchema> = {};
 	for (const field of getAllFields(definition)) {
+		if (isFieldNonInteractive(field)) continue;
 		shape[field.name] = buildFieldSchema(field);
 	}
 	return v.object(shape);
@@ -95,6 +111,7 @@ export function createValibotSchema(definition: FormDefinition) {
 export function createStepValibotSchema(step: FormStepDefinition) {
 	const shape: Record<string, AnySchema> = {};
 	for (const field of step.fields) {
+		if (isFieldNonInteractive(field)) continue;
 		shape[field.name] = buildFieldSchema(field);
 	}
 	return v.object(shape);
@@ -103,6 +120,7 @@ export function createStepValibotSchema(step: FormStepDefinition) {
 export function createDefaultValues(definition: FormDefinition): Record<string, unknown> {
 	const defaults: Record<string, unknown> = {};
 	for (const field of getAllFields(definition)) {
+		if (isFieldNonInteractive(field)) continue;
 		if (field.defaultValue !== undefined) {
 			defaults[field.name] = field.defaultValue;
 			continue;
@@ -118,6 +136,9 @@ export function createDefaultValues(definition: FormDefinition): Record<string, 
 				break;
 			case "tags":
 				defaults[field.name] = [];
+				break;
+			case "video":
+				defaults[field.name] = { progress: 0, ended: false, watchedSeconds: 0, totalSeconds: 0 };
 				break;
 			default:
 				defaults[field.name] = "";
