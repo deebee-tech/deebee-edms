@@ -2,15 +2,15 @@
 	import { enhance } from "$app/forms";
 	import { resolve } from "$app/paths";
 	import type { Pathname } from "$app/types";
-	import { Button } from "$lib/components/ui/button";
-	import { Input } from "$lib/components/ui/input";
-	import { Badge } from "$lib/components/ui/badge";
-	import * as Dialog from "$lib/components/ui/dialog";
-	import * as Table from "$lib/components/ui/table";
-	import PlusIcon from "@lucide/svelte/icons/plus";
-	import PencilIcon from "@lucide/svelte/icons/pencil";
-	import TrashIcon from "@lucide/svelte/icons/trash";
+	import { Badge } from "$lib/components/shadcn-svelte/badge";
+	import { Button } from "$lib/components/shadcn-svelte/button";
+	import * as Dialog from "$lib/components/shadcn-svelte/dialog";
+	import { Input } from "$lib/components/shadcn-svelte/input";
+	import * as Table from "$lib/components/shadcn-svelte/table";
 	import LayersIcon from "@lucide/svelte/icons/layers";
+	import PencilIcon from "@lucide/svelte/icons/pencil";
+	import PlusIcon from "@lucide/svelte/icons/plus";
+	import TrashIcon from "@lucide/svelte/icons/trash";
 
 	let { data } = $props();
 
@@ -91,7 +91,7 @@
 							</Badge>
 						</Table.Cell>
 						<Table.Cell>
-							<span class="text-xs">{new Date(ds.updated_at).toLocaleDateString()}</span>
+							<span class="text-xs">{new Date(String(ds.updated_at)).toLocaleDateString()}</span>
 						</Table.Cell>
 						<Table.Cell>
 							<div class="flex items-center gap-1">

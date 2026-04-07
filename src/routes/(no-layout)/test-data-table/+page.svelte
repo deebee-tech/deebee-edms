@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { createColumnHelper } from "@tanstack/table-core";
 	import { AppDataTable } from "$lib/components/data-table";
-	import { Badge } from "$lib/components/ui/badge";
-	import * as Tabs from "$lib/components/ui/tabs";
-	import { createStaticProvider } from "$lib/data-table/providers/static-provider.js";
-	import { createApiProvider, sveltekitPreset } from "$lib/data-table/providers/api-provider.js";
-	import { generateEmployees, type Employee } from "./sample-data.js";
-	import type { ColumnMeta } from "$lib/data-table/types.js";
-	import { renderSnippet } from "$lib/components/ui/data-table";
+	import { createApiProvider, sveltekitPreset } from "$lib/components/data-table/providers/api-provider.js";
+	import { createStaticProvider } from "$lib/components/data-table/providers/static-provider.js";
+	import type { ColumnMeta } from "$lib/components/data-table/types.js";
+	import { Badge } from "$lib/components/shadcn-svelte/badge";
+	import { renderSnippet } from "$lib/components/shadcn-svelte/data-table";
+	import * as Tabs from "$lib/components/shadcn-svelte/tabs";
 	import CodeIcon from "@lucide/svelte/icons/code";
+	import { createColumnHelper } from "@tanstack/table-core";
+	import { generateEmployees, type Employee } from "./sample-data.js";
 
 	const employees = generateEmployees(500);
 
@@ -44,8 +44,7 @@
 		}),
 		columnHelper.accessor("salary", {
 			header: "Salary",
-			cell: (info) =>
-				renderSnippet(salarySnippet, { value: info.getValue() }),
+			cell: (info) => renderSnippet(salarySnippet, { value: info.getValue() }),
 			size: 110,
 		}),
 		columnHelper.accessor("hireDate", {
@@ -54,15 +53,13 @@
 		}),
 		columnHelper.accessor("isActive", {
 			header: "Active",
-			cell: (info) =>
-				renderSnippet(activeSnippet, { value: info.getValue() }),
+			cell: (info) => renderSnippet(activeSnippet, { value: info.getValue() }),
 			size: 80,
 		}),
 		columnHelper.accessor("notes", {
 			header: "Notes",
 			size: 220,
-			cell: (info) =>
-				renderSnippet(notesSnippet, { value: info.getValue() }),
+			cell: (info) => renderSnippet(notesSnippet, { value: info.getValue() }),
 		}),
 	];
 
@@ -87,7 +84,12 @@
 			limit: params.limit,
 		}),
 		mapResponse: (json) => {
-			const data = json as { rows: Employee[]; totalCount: number; hasMore: boolean; _sql?: { dataSql: string; countSql: string } };
+			const data = json as {
+				rows: Employee[];
+				totalCount: number;
+				hasMore: boolean;
+				_sql?: { dataSql: string; countSql: string };
+			};
 			if (data._sql) {
 				latestSql = data._sql;
 			}
@@ -124,8 +126,8 @@
 	<div class="mb-6">
 		<h1 class="text-2xl font-bold">Data Table Demo</h1>
 		<p class="text-muted-foreground">
-			500 randomly generated employee records across three provider types.
-			Try sorting columns, applying per-column filters, and using the filter builder.
+			500 randomly generated employee records across three provider types. Try sorting columns, applying per-column
+			filters, and using the filter builder.
 		</p>
 	</div>
 
@@ -138,48 +140,32 @@
 
 		<Tabs.Content value="static">
 			<div class="mb-3 rounded-md border border-blue-200 bg-blue-50 p-3 text-sm dark:border-blue-900 dark:bg-blue-950">
-				<strong>Static Provider</strong> &mdash; All 500 rows loaded in memory. Filtering, sorting,
-				and pagination happen client-side in JavaScript.
+				<strong>Static Provider</strong> &mdash; All 500 rows loaded in memory. Filtering, sorting, and pagination happen
+				client-side in JavaScript.
 			</div>
-			<AppDataTable
-				provider={staticProvider}
-				{columnDefs}
-				{columnMeta}
-				syncUrl={false}
-				pageSize={50}
-			/>
+			<AppDataTable provider={staticProvider} {columnDefs} {columnMeta} syncUrl={false} pageSize={50} />
 		</Tabs.Content>
 
 		<Tabs.Content value="api">
-			<div class="mb-3 rounded-md border border-green-200 bg-green-50 p-3 text-sm dark:border-green-900 dark:bg-green-950">
-				<strong>API Provider</strong> &mdash; Uses <code>createApiProvider</code> with
-				the <code>sveltekitPreset</code> to fetch from a local <code>+server.ts</code> endpoint
-				via POST. Filters, sort, and pagination are sent as JSON.
+			<div
+				class="mb-3 rounded-md border border-green-200 bg-green-50 p-3 text-sm dark:border-green-900 dark:bg-green-950"
+			>
+				<strong>API Provider</strong> &mdash; Uses <code>createApiProvider</code> with the <code>sveltekitPreset</code>
+				to fetch from a local <code>+server.ts</code> endpoint via POST. Filters, sort, and pagination are sent as JSON.
 			</div>
-			<AppDataTable
-				provider={apiProvider}
-				{columnDefs}
-				{columnMeta}
-				syncUrl={false}
-				pageSize={50}
-			/>
+			<AppDataTable provider={apiProvider} {columnDefs} {columnMeta} syncUrl={false} pageSize={50} />
 		</Tabs.Content>
 
 		<Tabs.Content value="sqleasy">
-			<div class="mb-3 rounded-md border border-purple-200 bg-purple-50 p-3 text-sm dark:border-purple-900 dark:bg-purple-950">
-				<strong>SQLEasy Provider</strong> &mdash; Same API endpoint, but also returns the
-				SQL that <code>PostgresSqlEasy</code> would generate for each query.
-				Data is still served from the in-memory array (no real DB), but the SQL shown below
-				is exactly what would run against PostgreSQL.
+			<div
+				class="mb-3 rounded-md border border-purple-200 bg-purple-50 p-3 text-sm dark:border-purple-900 dark:bg-purple-950"
+			>
+				<strong>SQLEasy Provider</strong> &mdash; Same API endpoint, but also returns the SQL that
+				<code>PostgresSqlEasy</code> would generate for each query. Data is still served from the in-memory array (no real
+				DB), but the SQL shown below is exactly what would run against PostgreSQL.
 			</div>
 
-			<AppDataTable
-				provider={sqlEasyApiProvider}
-				{columnDefs}
-				{columnMeta}
-				syncUrl={false}
-				pageSize={50}
-			/>
+			<AppDataTable provider={sqlEasyApiProvider} {columnDefs} {columnMeta} syncUrl={false} pageSize={50} />
 
 			{#if latestSql}
 				<div class="mt-4 rounded-md border bg-muted/50 p-4">

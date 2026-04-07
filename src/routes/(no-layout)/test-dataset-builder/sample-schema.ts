@@ -1,4 +1,4 @@
-import type { SchemaTable } from "$lib/datasets/types";
+import type { SchemaTable } from "$lib/components/dataset-builder/types";
 
 export const sampleSchema: SchemaTable[] = [
 	{
@@ -6,7 +6,13 @@ export const sampleSchema: SchemaTable[] = [
 		name: "employees",
 		type: "table",
 		columns: [
-			{ name: "id", dataType: "integer", nullable: false, isPrimaryKey: true, defaultValue: "nextval('employees_id_seq')" },
+			{
+				name: "id",
+				dataType: "integer",
+				nullable: false,
+				isPrimaryKey: true,
+				defaultValue: "nextval('employees_id_seq')",
+			},
 			{ name: "first_name", dataType: "character varying", nullable: false, isPrimaryKey: false },
 			{ name: "last_name", dataType: "character varying", nullable: false, isPrimaryKey: false },
 			{ name: "email", dataType: "character varying", nullable: false, isPrimaryKey: false },
@@ -26,12 +32,24 @@ export const sampleSchema: SchemaTable[] = [
 		name: "departments",
 		type: "table",
 		columns: [
-			{ name: "id", dataType: "integer", nullable: false, isPrimaryKey: true, defaultValue: "nextval('departments_id_seq')" },
+			{
+				name: "id",
+				dataType: "integer",
+				nullable: false,
+				isPrimaryKey: true,
+				defaultValue: "nextval('departments_id_seq')",
+			},
 			{ name: "name", dataType: "character varying", nullable: false, isPrimaryKey: false },
 			{ name: "code", dataType: "character varying", nullable: false, isPrimaryKey: false },
 			{ name: "location", dataType: "character varying", nullable: true, isPrimaryKey: false },
 			{ name: "budget", dataType: "numeric", nullable: true, isPrimaryKey: false },
-			{ name: "created_at", dataType: "timestamp with time zone", nullable: false, isPrimaryKey: false, defaultValue: "now()" },
+			{
+				name: "created_at",
+				dataType: "timestamp with time zone",
+				nullable: false,
+				isPrimaryKey: false,
+				defaultValue: "now()",
+			},
 		],
 		foreignKeys: [],
 	},
@@ -40,30 +58,38 @@ export const sampleSchema: SchemaTable[] = [
 		name: "titles",
 		type: "table",
 		columns: [
-			{ name: "id", dataType: "integer", nullable: false, isPrimaryKey: true, defaultValue: "nextval('titles_id_seq')" },
+			{
+				name: "id",
+				dataType: "integer",
+				nullable: false,
+				isPrimaryKey: true,
+				defaultValue: "nextval('titles_id_seq')",
+			},
 			{ name: "employee_id", dataType: "integer", nullable: false, isPrimaryKey: false },
 			{ name: "title", dataType: "character varying", nullable: false, isPrimaryKey: false },
 			{ name: "from_date", dataType: "date", nullable: false, isPrimaryKey: false },
 			{ name: "to_date", dataType: "date", nullable: true, isPrimaryKey: false },
 		],
-		foreignKeys: [
-			{ columnName: "employee_id", referencedTable: "employees", referencedColumn: "id" },
-		],
+		foreignKeys: [{ columnName: "employee_id", referencedTable: "employees", referencedColumn: "id" }],
 	},
 	{
 		schema: "public",
 		name: "salary_history",
 		type: "table",
 		columns: [
-			{ name: "id", dataType: "integer", nullable: false, isPrimaryKey: true, defaultValue: "nextval('salary_history_id_seq')" },
+			{
+				name: "id",
+				dataType: "integer",
+				nullable: false,
+				isPrimaryKey: true,
+				defaultValue: "nextval('salary_history_id_seq')",
+			},
 			{ name: "employee_id", dataType: "integer", nullable: false, isPrimaryKey: false },
 			{ name: "amount", dataType: "numeric", nullable: false, isPrimaryKey: false },
 			{ name: "effective_date", dataType: "date", nullable: false, isPrimaryKey: false },
 			{ name: "reason", dataType: "character varying", nullable: true, isPrimaryKey: false },
 		],
-		foreignKeys: [
-			{ columnName: "employee_id", referencedTable: "employees", referencedColumn: "id" },
-		],
+		foreignKeys: [{ columnName: "employee_id", referencedTable: "employees", referencedColumn: "id" }],
 	},
 	{
 		schema: "public",
@@ -77,9 +103,7 @@ export const sampleSchema: SchemaTable[] = [
 			{ name: "end_date", dataType: "date", nullable: true, isPrimaryKey: false },
 			{ name: "status", dataType: "character varying", nullable: false, isPrimaryKey: false, defaultValue: "'active'" },
 		],
-		foreignKeys: [
-			{ columnName: "department_id", referencedTable: "departments", referencedColumn: "id" },
-		],
+		foreignKeys: [{ columnName: "department_id", referencedTable: "departments", referencedColumn: "id" }],
 	},
 	{
 		schema: "public",

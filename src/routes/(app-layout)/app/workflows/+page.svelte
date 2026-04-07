@@ -2,20 +2,20 @@
 	import { enhance } from "$app/forms";
 	import { resolve } from "$app/paths";
 	import type { Pathname } from "$app/types";
-	import { createColumnHelper } from "@tanstack/table-core";
 	import { AppDataTable } from "$lib/components/data-table";
-	import { renderSnippet } from "$lib/components/ui/data-table";
-	import { Button } from "$lib/components/ui/button";
-	import { Input } from "$lib/components/ui/input";
-	import { Badge } from "$lib/components/ui/badge";
-	import * as Dialog from "$lib/components/ui/dialog";
+	import { createSupabaseProvider } from "$lib/components/data-table/providers/supabase-provider.js";
+	import type { ColumnMeta } from "$lib/components/data-table/types.js";
+	import { Badge } from "$lib/components/shadcn-svelte/badge";
+	import { Button } from "$lib/components/shadcn-svelte/button";
+	import { renderSnippet } from "$lib/components/shadcn-svelte/data-table";
+	import * as Dialog from "$lib/components/shadcn-svelte/dialog";
+	import { Input } from "$lib/components/shadcn-svelte/input";
 	import { supabase } from "$lib/database/supabase.client";
-	import { createSupabaseProvider } from "$lib/data-table/providers/supabase-provider.js";
-	import type { ColumnMeta } from "$lib/data-table/types.js";
-	import PlusIcon from "@lucide/svelte/icons/plus";
-	import PencilIcon from "@lucide/svelte/icons/pencil";
-	import TrashIcon from "@lucide/svelte/icons/trash";
 	import NetworkIcon from "@lucide/svelte/icons/network";
+	import PencilIcon from "@lucide/svelte/icons/pencil";
+	import PlusIcon from "@lucide/svelte/icons/plus";
+	import TrashIcon from "@lucide/svelte/icons/trash";
+	import { createColumnHelper } from "@tanstack/table-core";
 
 	let { data } = $props();
 
@@ -163,7 +163,7 @@
 		{provider}
 		{columnDefs}
 		{columnMeta}
-		initialData={data.initialData as import("$lib/data-table/types.js").DataProviderResult<WorkflowRow>}
+		initialData={data.initialData as import("$lib/components/data-table/types.js").DataProviderResult<WorkflowRow>}
 		pageSize={50}
 		tableHeight="500px"
 		actions={actionsSnippet}

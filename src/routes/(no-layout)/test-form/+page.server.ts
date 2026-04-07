@@ -1,4 +1,4 @@
-import { validateDynamicForm } from "$lib/forms/server";
+import { validateDynamicForm } from "$lib/components/dynamic-forms";
 import { fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import { sampleFormDefinition } from "./sample-definition";

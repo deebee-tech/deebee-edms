@@ -1,4 +1,4 @@
-import type { WorkflowDefinition } from "$lib/workflows/types";
+import type { WorkflowDefinition } from "$lib/components/workflow-builder/types";
 
 export const sampleWorkflowDefinition: WorkflowDefinition = {
 	id: "sample-workflow-1",

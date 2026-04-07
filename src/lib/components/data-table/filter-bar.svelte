@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Badge } from "$lib/components/ui/badge";
-	import { Button } from "$lib/components/ui/button";
-	import { getOperatorLabel } from "$lib/data-table/filter-operators.js";
-	import type { ColumnFilter, ColumnMeta } from "$lib/data-table/types.js";
-	import XIcon from "@lucide/svelte/icons/x";
+	import { Badge } from "$lib/components/shadcn-svelte/badge";
+	import { Button } from "$lib/components/shadcn-svelte/button";
 	import Trash2Icon from "@lucide/svelte/icons/trash-2";
+	import XIcon from "@lucide/svelte/icons/x";
+	import { getOperatorLabel } from "./filter-operators.js";
+	import type { ColumnFilter, ColumnMeta } from "./types.js";
 
 	interface Props {
 		filters: ColumnFilter[];
@@ -36,10 +36,7 @@
 				{#if formatValue(filter)}
 					<span>"{formatValue(filter)}"</span>
 				{/if}
-				<button
-					class="ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20"
-					onclick={() => onRemove(filter.id)}
-				>
+				<button class="ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20" onclick={() => onRemove(filter.id)}>
 					<XIcon class="size-3" />
 				</button>
 			</Badge>

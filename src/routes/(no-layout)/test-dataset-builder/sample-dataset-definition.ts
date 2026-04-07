@@ -1,4 +1,5 @@
-import type { DatasetDefinition } from "$lib/datasets/types";
+import type { DatasetDefinition } from "$lib/components/dataset-builder/types";
+import { FilterOperator } from "$lib/components/filter-builder/types";
 
 export const sampleDatasetDefinition: DatasetDefinition = {
 	id: "sample-dataset-1",
@@ -76,20 +77,21 @@ export const sampleDatasetDefinition: DatasetDefinition = {
 	],
 	filters: [
 		{
-			id: "filter-salary",
-			tableId: "tbl-employees",
-			columnName: "salary",
-			operator: "gt",
-			value: "50000",
 			logic: "and",
-		},
-		{
-			id: "filter-active",
-			tableId: "tbl-employees",
-			columnName: "is_active",
-			operator: "eq",
-			value: "true",
-			logic: "and",
+			filters: [
+				{
+					id: "filter-salary",
+					column: "tbl-employees:salary",
+					operator: FilterOperator.GreaterThan,
+					value: "50000",
+				},
+				{
+					id: "filter-active",
+					column: "tbl-employees:is_active",
+					operator: FilterOperator.Equals,
+					value: "true",
+				},
+			],
 		},
 	],
 	sort: [],

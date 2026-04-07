@@ -1,0 +1,40 @@
+<script lang="ts">
+	import * as Command from "$lib/components/shadcn-svelte/command";
+	import type { NLPDateInputProps } from "$lib/components/shadcn-svelte/nlp-date-input/types";
+	import { parseDate } from "yeezy-dates";
+
+	let { placeholder = 'E.g. "tomorrow at 5pm" or "in 2 hours"', min, max, onChoice }: NLPDateInputProps = $props();
+
+	let value = $state("");
+
+	const suggestions = $derived(
+		parseDate(value).filter(
+			(suggestion) => (min === undefined || suggestion.date > min) && (max === undefined || suggestion.date < max),
+		),
+	);
+</script>
+
+<Command.Root shouldFilter={false} class="h-fit border border-border">
+	<Command.Input {placeholder} bind:value />
+	<Command.List>
+		<Command.Group>
+			{#each suggestions as suggestion (suggestion)}
+				<Command.Item
+					onSelect={() => {
+						onChoice?.(suggestion);
+					}}
+				>
+					<div class="flex w-full place-items-center justify-between gap-2">
+						<span>
+							{suggestion.label}
+						</span>
+						<span class="text-muted-foreground">
+							{suggestion.date.toDateString()}
+							{suggestion.date.toLocaleTimeString()}
+						</span>
+					</div>
+				</Command.Item>
+			{/each}
+		</Command.Group>
+	</Command.List>
+</Command.Root>

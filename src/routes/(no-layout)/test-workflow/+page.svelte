@@ -1,9 +1,9 @@
 <script lang="ts">
+	import * as Card from "$lib/components/shadcn-svelte/card";
+	import { CopyButton } from "$lib/components/shadcn-svelte/copy-button";
+	import * as Tabs from "$lib/components/shadcn-svelte/tabs";
 	import { WorkflowBuilder } from "$lib/components/workflow-builder";
-	import * as Tabs from "$lib/components/ui/tabs";
-	import * as Card from "$lib/components/ui/card";
-	import { CopyButton } from "$lib/components/ui/copy-button";
-	import type { WorkflowDefinition } from "$lib/workflows/types";
+	import type { WorkflowDefinition } from "$lib/components/workflow-builder/types";
 	import { sampleWorkflowDefinition } from "./sample-workflow-definition";
 
 	let definition = $state<WorkflowDefinition>({ ...sampleWorkflowDefinition });

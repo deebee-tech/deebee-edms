@@ -71,7 +71,7 @@
 		onnodeclick?.(node.id);
 	}
 
-	function handlePaneClick(_: { event: MouseEvent }) {
+	function handlePaneClick() {
 		onpaneclick?.();
 	}
 
@@ -83,7 +83,13 @@
 		onedgeclick?.(edge.id, event.clientX, event.clientY);
 	}
 
-	function handleNodeDragStop({ targetNode }: { targetNode: Node | null; nodes: Node[]; event: MouseEvent | TouchEvent }) {
+	function handleNodeDragStop({
+		targetNode,
+	}: {
+		targetNode: Node | null;
+		nodes: Node[];
+		event: MouseEvent | TouchEvent;
+	}) {
 		if (targetNode) onnodedragstop?.(targetNode.id, targetNode.position);
 	}
 </script>

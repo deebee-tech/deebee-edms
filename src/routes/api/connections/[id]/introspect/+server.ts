@@ -1,8 +1,8 @@
-import { json, error } from "@sveltejs/kit";
-import type { RequestHandler } from "./$types";
+import { introspect } from "$lib/components/dataset-builder/introspect";
+import type { DbConnectionConfig, DbEngine } from "$lib/components/dataset-builder/types";
 import { getSupabaseForDynamicTables } from "$lib/database/supabase.client";
-import { introspectPostgres } from "$lib/datasets/introspect";
-import type { DbConnectionConfig, DbEngine } from "$lib/datasets/types";
+import { error, json } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
 
 const supabase = getSupabaseForDynamicTables();
 
@@ -20,12 +20,8 @@ export const POST: RequestHandler = async ({ params }) => {
 	const config = connection.connection_config as unknown as DbConnectionConfig;
 	const engine = connection.engine as DbEngine;
 
-	if (engine !== "postgres") {
-		error(400, `Introspection for ${engine} is not yet supported`);
-	}
-
 	try {
-		const schemaData = await introspectPostgres(config);
+		const schemaData = await introspect(engine, config);
 
 		await supabase.from("db_connection_schemas").upsert(
 			{

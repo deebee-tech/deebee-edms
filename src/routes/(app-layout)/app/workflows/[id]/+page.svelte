@@ -2,11 +2,11 @@
 	import { enhance } from "$app/forms";
 	import { resolve } from "$app/paths";
 	import type { Pathname } from "$app/types";
+	import { Button } from "$lib/components/shadcn-svelte/button";
 	import { WorkflowBuilder } from "$lib/components/workflow-builder";
-	import { Button } from "$lib/components/ui/button";
-	import SaveIcon from "@lucide/svelte/icons/save";
+	import type { WorkflowDefinition } from "$lib/components/workflow-builder/types";
 	import ArrowLeftIcon from "@lucide/svelte/icons/arrow-left";
-	import type { WorkflowDefinition } from "$lib/workflows/types";
+	import SaveIcon from "@lucide/svelte/icons/save";
 
 	let { data } = $props();
 

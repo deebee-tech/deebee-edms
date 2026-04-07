@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Handle, Position, type NodeProps } from "@xyflow/svelte";
 	import KeyIcon from "@lucide/svelte/icons/key";
 	import LinkIcon from "@lucide/svelte/icons/link";
 	import TableIcon from "@lucide/svelte/icons/table";
-	import type { SchemaColumn, SchemaForeignKey } from "$lib/datasets/types";
+	import { Handle, Position, type NodeProps } from "@xyflow/svelte";
+	import type { SchemaColumn, SchemaForeignKey } from "../types";
 
 	let { data, id, selected }: NodeProps = $props();
 
@@ -24,9 +24,9 @@
 
 <div
 	data-node-id={id}
-	class="min-w-[200px] max-w-[280px] overflow-hidden rounded-lg border shadow-sm transition-shadow {selected
-		? 'shadow-md ring-2 ring-primary/50 border-primary/50'
-		: 'shadow-sm border-border'} bg-background"
+	class="max-w-[280px] min-w-[200px] overflow-hidden rounded-lg border shadow-sm transition-shadow {selected
+		? 'border-primary/50 shadow-md ring-2 ring-primary/50'
+		: 'border-border shadow-sm'} bg-background"
 >
 	<div class="flex items-center gap-2 bg-blue-500 px-3 py-1.5 text-white">
 		<TableIcon class="size-3.5 shrink-0" />
@@ -37,7 +37,7 @@
 	</div>
 
 	<div class="max-h-[240px] overflow-y-auto">
-		{#each columns as col, i (col.name)}
+		{#each columns as col, i (i)}
 			<button
 				class="flex w-full items-center gap-1.5 border-b border-border/30 px-3 py-1 text-left text-[11px] last:border-b-0 hover:bg-accent"
 				ondblclick={() => handleColumnDblClick(col.name)}

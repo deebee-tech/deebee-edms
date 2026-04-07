@@ -1,29 +1,25 @@
 <script lang="ts" generics="TData extends Record<string, unknown> = Record<string, unknown>">
-	import {
-		type ColumnDef,
-		type SortingState,
-		getCoreRowModel,
-		type OnChangeFn,
-	} from "@tanstack/table-core";
-	import { createSvelteTable, FlexRender } from "$lib/components/ui/data-table";
-	import * as Table from "$lib/components/ui/table";
-	import { createSvelteVirtualizer } from "$lib/components/ui/data-table/virtualizer.svelte.js";
-	import FilterBar from "./filter-bar.svelte";
-	import ColumnFilterPopover from "./column-filter-popover.svelte";
-	import FilterBuilderDialog from "./filter-builder-dialog.svelte";
-	import {
-		type DataProvider,
-		type DataProviderResult,
-		type ColumnFilter,
-		type ColumnMeta,
-		type FilterGroup,
-		type SortSpec,
-	} from "$lib/data-table/types.js";
-	import { serializeTableState } from "$lib/data-table/url-state.js";
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
+	import { createSvelteTable, FlexRender } from "$lib/components/shadcn-svelte/data-table";
+	import { createSvelteVirtualizer } from "$lib/components/shadcn-svelte/data-table/virtualizer.svelte.js";
+	import * as Table from "$lib/components/shadcn-svelte/table";
+	import { cn } from "$lib/utils.js";
+	import ArrowDownIcon from "@lucide/svelte/icons/arrow-down";
+	import ArrowUpIcon from "@lucide/svelte/icons/arrow-up";
+	import ArrowUpDownIcon from "@lucide/svelte/icons/arrow-up-down";
 	import LoaderCircleIcon from "@lucide/svelte/icons/loader-circle";
+	import {
+		getCoreRowModel,
+		type ColumnDef,
+		type ColumnOrderState,
+		type OnChangeFn,
+		type SortingState,
+	} from "@tanstack/table-core";
 	import { onMount, type Snippet } from "svelte";
+	import { FilterBuilderDialog, type ColumnMeta, type FilterGroup } from "$lib/components/filter-builder";
+	import { type DataProvider, type DataProviderResult, type SortSpec } from "./types.js";
+	import { serializeTableState } from "./url-state.js";
 
 	interface Props {
 		provider: DataProvider<TData>;
@@ -72,9 +68,20 @@
 	let hasMore = $state(_snapshot.more);
 	let isLoading = $state(!_snapshot.had);
 	let isLoadingMore = $state(false);
-	let filters = $state<ColumnFilter[]>([]);
 	let filterGroups = $state<FilterGroup[]>([]);
 	let sorting = $state<SortingState>([]);
+	const _initColOrder: ColumnOrderState = (() => {
+		const defs = columnDefs;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		return defs.map((col) => col.id ?? (col as any).accessorKey as string).filter(Boolean);
+	})();
+	let columnOrder = $state<ColumnOrderState>(_initColOrder);
+
+	// ── Drag-and-drop column reordering ──
+
+	let dragColumnId = $state<string | null>(null);
+	let dropTargetId = $state<string | null>(null);
+	let dropSide = $state<"left" | "right" | null>(null);
 
 	let scrollContainerRef = $state<HTMLDivElement | null>(null);
 
@@ -83,6 +90,10 @@
 	const onSortingChange: OnChangeFn<SortingState> = (updater) => {
 		sorting = typeof updater === "function" ? updater(sorting) : updater;
 		void fetchData(true);
+	};
+
+	const onColumnOrderChange: OnChangeFn<ColumnOrderState> = (updater) => {
+		columnOrder = typeof updater === "function" ? updater(columnOrder) : updater;
 	};
 
 	const table = createSvelteTable<TData>({
@@ -96,9 +107,10 @@
 		manualSorting: true,
 		manualFiltering: true,
 		get state() {
-			return { sorting };
+			return { sorting, columnOrder };
 		},
 		onSortingChange,
+		onColumnOrderChange,
 	});
 
 	// ── Virtualizer ──
@@ -128,7 +140,7 @@
 
 		try {
 			const result = await provider({
-				filters,
+				filters: [],
 				filterGroups: filterGroups.length > 0 ? filterGroups : undefined,
 				sort: currentSort(),
 				offset: reset ? 0 : allRows.length,
@@ -145,13 +157,13 @@
 
 			if (syncUrl) {
 				const sp = serializeTableState(
-					{ filters, sort: currentSort(), offset: 0 },
+					{ filters: [], sort: currentSort(), offset: 0 },
 					new URLSearchParams(page.url.searchParams),
 				);
 				const newUrl = `${page.url.pathname}?${sp.toString()}`;
 				if (newUrl !== `${page.url.pathname}?${page.url.searchParams.toString()}`) {
 					// eslint-disable-next-line svelte/no-navigation-without-resolve
-				void goto(newUrl, { replaceState: true, keepFocus: true, noScroll: true });
+					void goto(newUrl, { replaceState: true, keepFocus: true, noScroll: true });
 				}
 			}
 		} finally {
@@ -180,25 +192,61 @@
 
 	// ── Filter Handlers ──
 
-	function handleAddFilter(filter: ColumnFilter) {
-		filters = [...filters, filter];
-		void fetchData(true);
-	}
-
-	function handleRemoveFilter(filterId: string) {
-		filters = filters.filter((f) => f.id !== filterId);
-		void fetchData(true);
-	}
-
-	function handleClearAllFilters() {
-		filters = [];
-		filterGroups = [];
-		void fetchData(true);
-	}
-
 	function handleFilterBuilderApply(groups: FilterGroup[]) {
 		filterGroups = groups;
 		void fetchData(true);
+	}
+
+	// ── Column Drag-and-Drop ──
+
+	function handleDragStart(e: DragEvent, colId: string) {
+		dragColumnId = colId;
+		if (e.dataTransfer) {
+			e.dataTransfer.effectAllowed = "move";
+			e.dataTransfer.setData("text/plain", colId);
+		}
+	}
+
+	function handleDragOver(e: DragEvent, colId: string) {
+		if (!dragColumnId || dragColumnId === colId) {
+			dropTargetId = null;
+			dropSide = null;
+			return;
+		}
+		e.preventDefault();
+		const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+		const midpoint = rect.left + rect.width / 2;
+		dropTargetId = colId;
+		dropSide = e.clientX < midpoint ? "left" : "right";
+	}
+
+	function handleDrop(e: DragEvent) {
+		e.preventDefault();
+		if (!dragColumnId || !dropTargetId || !dropSide) return;
+
+		const order = [...columnOrder];
+		const fromIdx = order.indexOf(dragColumnId);
+		if (fromIdx === -1) return;
+
+		order.splice(fromIdx, 1);
+		let toIdx = order.indexOf(dropTargetId);
+		if (toIdx === -1) return;
+		if (dropSide === "right") toIdx += 1;
+
+		order.splice(toIdx, 0, dragColumnId);
+		columnOrder = order;
+		resetDragState();
+	}
+
+	function resetDragState() {
+		dragColumnId = null;
+		dropTargetId = null;
+		dropSide = null;
+	}
+
+	function orderedCells(row: ReturnType<typeof table.getRowModel>["rows"][number]) {
+		void columnOrder;
+		return row.getVisibleCells();
 	}
 
 	// ── Initial Load ──
@@ -213,11 +261,7 @@
 <div class="flex flex-col overflow-hidden rounded-md border">
 	<!-- Toolbar -->
 	<div class="flex items-center gap-2 border-b px-3 py-2">
-		<FilterBuilderDialog
-			columns={columnMeta}
-			onApply={handleFilterBuilderApply}
-			existingGroups={filterGroups}
-		/>
+		<FilterBuilderDialog columns={columnMeta} onApply={handleFilterBuilderApply} existingGroups={filterGroups} />
 		{#if toolbar}
 			{@render toolbar()}
 		{/if}
@@ -227,14 +271,6 @@
 			{/if}
 		</div>
 	</div>
-
-	<!-- Filter Bar -->
-	<FilterBar
-		{filters}
-		columns={columnMeta}
-		onRemove={handleRemoveFilter}
-		onClearAll={handleClearAllFilters}
-	/>
 
 	<!-- Table -->
 	{#if isLoading && allRows.length === 0}
@@ -247,60 +283,56 @@
 		{:else}
 			<div class="flex flex-col items-center justify-center py-16 text-muted-foreground">
 				<p class="text-sm">No results found</p>
-				{#if filters.length > 0}
+				{#if filterGroups.length > 0}
 					<p class="mt-1 text-xs">Try adjusting your filters</p>
 				{/if}
 			</div>
 		{/if}
 	{:else}
-		<div
-			bind:this={scrollContainerRef}
-			class="overflow-auto"
-			style="height: {tableHeight};"
-		>
+		<div bind:this={scrollContainerRef} class="overflow-auto" style="height: {tableHeight};">
 			<Table.Root>
 				<Table.Header class="sticky top-0 z-10 bg-background">
 					{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
 						<Table.Row>
 							{#each headerGroup.headers as header (header.id)}
+								{@const colId = header.column.id}
 								<Table.Head
-									class="whitespace-nowrap"
+									class={cn(
+										"whitespace-nowrap transition-[border-color] duration-150",
+										!header.isPlaceholder && "cursor-grab select-none",
+										dragColumnId === colId && "opacity-50",
+										dropTargetId === colId && dropSide === "left" && "border-l-2 border-l-primary",
+										dropTargetId === colId && dropSide === "right" && "border-r-2 border-r-primary",
+									)}
 									style="width: {header.getSize()}px;"
+									draggable={!header.isPlaceholder}
+									ondragstart={(e: DragEvent) => handleDragStart(e, colId)}
+									ondragover={(e: DragEvent) => handleDragOver(e, colId)}
+									ondrop={(e: DragEvent) => handleDrop(e)}
+									ondragleave={() => { dropTargetId = null; dropSide = null; }}
+									ondragend={() => resetDragState()}
 								>
-									{#if !header.isPlaceholder}
-										{@const meta = columnMeta.find((m) => m.key === header.column.id)}
-										<div class="flex items-center">
-											{#if header.column.getCanSort()}
-												<button
-													class="flex items-center gap-1 hover:text-foreground"
-													onclick={() => header.column.toggleSorting()}
-												>
-													<FlexRender
-														content={header.column.columnDef.header}
-														context={header.getContext()}
-													/>
-													{#if header.column.getIsSorted() === "asc"}
-														<span class="text-xs">↑</span>
-													{:else if header.column.getIsSorted() === "desc"}
-														<span class="text-xs">↓</span>
-													{/if}
-												</button>
-											{:else}
-												<FlexRender
-													content={header.column.columnDef.header}
-													context={header.getContext()}
-												/>
-											{/if}
-											{#if meta && meta.filterable !== false}
-												<ColumnFilterPopover
-													column={meta}
-													activeFilters={filters}
-													onApply={handleAddFilter}
-													onRemove={handleRemoveFilter}
-												/>
-											{/if}
-										</div>
-									{/if}
+								{#if !header.isPlaceholder}
+									<div class="flex items-center">
+										{#if header.column.getCanSort()}
+											<button
+												class="flex cursor-pointer items-center gap-1 text-muted-foreground hover:text-foreground"
+												onclick={() => header.column.toggleSorting()}
+											>
+												<FlexRender content={header.column.columnDef.header} context={header.getContext()} />
+												{#if header.column.getIsSorted() === "asc"}
+													<ArrowUpIcon class="size-3.5" />
+												{:else if header.column.getIsSorted() === "desc"}
+													<ArrowDownIcon class="size-3.5" />
+												{:else}
+													<ArrowUpDownIcon class="size-3.5 opacity-50" />
+												{/if}
+											</button>
+										{:else}
+											<FlexRender content={header.column.columnDef.header} context={header.getContext()} />
+										{/if}
+									</div>
+								{/if}
 								</Table.Head>
 							{/each}
 							{#if actions}
@@ -321,12 +353,9 @@
 							{@const row = table.getRowModel().rows[virtualRow.index]}
 							{#if row}
 								<Table.Row data-index={virtualRow.index}>
-									{#each row.getVisibleCells() as cell (cell.id)}
+									{#each orderedCells(row) as cell (cell.id)}
 										<Table.Cell>
-											<FlexRender
-												content={cell.column.columnDef.cell}
-												context={cell.getContext()}
-											/>
+											<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
 										</Table.Cell>
 									{/each}
 									{#if actions}

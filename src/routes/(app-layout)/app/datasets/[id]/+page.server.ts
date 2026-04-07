@@ -1,16 +1,12 @@
+import type { DatasetDefinition, SchemaData } from "$lib/components/dataset-builder/types";
 import { getSupabaseForDynamicTables } from "$lib/database/supabase.client";
 import { error, fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
-import type { DatasetDefinition, SchemaData } from "$lib/datasets/types";
 
 const supabase = getSupabaseForDynamicTables();
 
 export const load: PageServerLoad = async ({ params }) => {
-	const { data: dataset, error: dbError } = await supabase
-		.from("datasets")
-		.select("*")
-		.eq("id", params.id)
-		.single();
+	const { data: dataset, error: dbError } = await supabase.from("datasets").select("*").eq("id", params.id).single();
 
 	if (dbError || !dataset) {
 		error(404, "Dataset not found");

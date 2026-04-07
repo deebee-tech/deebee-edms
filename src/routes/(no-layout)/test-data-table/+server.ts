@@ -1,15 +1,15 @@
-import { json } from "@sveltejs/kit";
-import type { RequestHandler } from "./$types";
-import { generateEmployees, type Employee } from "./sample-data.js";
-import { createStaticProvider } from "$lib/data-table/providers/static-provider.js";
+import { createStaticProvider } from "$lib/components/data-table/providers/static-provider.js";
 import {
 	FilterOperator,
 	type ColumnFilter,
 	type DataProviderParams,
 	type FilterGroup,
 	type SortSpec,
-} from "$lib/data-table/types.js";
-import { PostgresSqlEasy, WhereOperator, OrderByDirection } from "@deebeetech/sqleasy";
+} from "$lib/components/data-table/types.js";
+import { OrderByDirection, PostgresSqlEasy, WhereOperator } from "@deebeetech/sqleasy";
+import { json } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
+import { generateEmployees, type Employee } from "./sample-data.js";
 
 const employees = generateEmployees(500);
 const staticProvider = createStaticProvider<Employee>(employees);
@@ -65,7 +65,7 @@ function buildDemoSql(params: DataProviderParams): { dataSql: string; countSql: 
 		applyFilterToBuilder(builder, alias, f);
 	}
 
-	for (const s of (params.sort.length > 0 ? params.sort : [{ column: "id", ascending: true }])) {
+	for (const s of params.sort.length > 0 ? params.sort : [{ column: "id", ascending: true }]) {
 		builder.orderByColumn(alias, s.column, s.ascending ? OrderByDirection.Ascending : OrderByDirection.Descending);
 	}
 
@@ -115,7 +115,11 @@ function applyFilterToBuilder(builder: any, alias: string, f: ColumnFilter) {
 			builder.whereNotNull(alias, f.column);
 			break;
 		case FilterOperator.InList: {
-			const list = Array.isArray(f.value) ? f.value : String(f.value).split(",").map((s: string) => s.trim());
+			const list = Array.isArray(f.value)
+				? f.value
+				: String(f.value)
+						.split(",")
+						.map((s: string) => s.trim());
 			builder.whereInValues(alias, f.column, list);
 			break;
 		}

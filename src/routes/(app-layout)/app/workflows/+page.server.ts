@@ -1,6 +1,6 @@
+import { createSupabaseProvider } from "$lib/components/data-table/providers/supabase-provider.js";
+import { deserializeTableState } from "$lib/components/data-table/url-state.js";
 import { supabase } from "$lib/database/supabase.client";
-import { createSupabaseProvider } from "$lib/data-table/providers/supabase-provider.js";
-import { deserializeTableState } from "$lib/data-table/url-state.js";
 import { fail, redirect } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 

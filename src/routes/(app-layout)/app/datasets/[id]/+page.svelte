@@ -4,10 +4,10 @@
 	import type { Pathname } from "$app/types";
 	import { DatasetBuilder } from "$lib/components/dataset-builder";
 	import SqlPreviewDialog from "$lib/components/dataset-builder/sql-preview-dialog.svelte";
-	import { Button } from "$lib/components/ui/button";
-	import SaveIcon from "@lucide/svelte/icons/save";
+	import type { DatasetDefinition } from "$lib/components/dataset-builder/types";
+	import { Button } from "$lib/components/shadcn-svelte/button";
 	import ArrowLeftIcon from "@lucide/svelte/icons/arrow-left";
-	import type { DatasetDefinition } from "$lib/datasets/types";
+	import SaveIcon from "@lucide/svelte/icons/save";
 
 	let { data } = $props();
 
@@ -76,10 +76,6 @@
 	</header>
 
 	<div class="flex-1 overflow-hidden">
-		<DatasetBuilder
-			{definition}
-			schema={data.schema.tables}
-			ondefinitionchange={handleDefinitionChange}
-		/>
+		<DatasetBuilder {definition} schema={data.schema.tables} ondefinitionchange={handleDefinitionChange} />
 	</div>
 </div>

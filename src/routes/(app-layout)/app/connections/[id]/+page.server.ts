@@ -1,7 +1,7 @@
+import type { DbConnectionConfig } from "$lib/components/dataset-builder/types";
 import { getSupabaseForDynamicTables } from "$lib/database/supabase.client";
 import { error, fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
-import type { DbConnectionConfig } from "$lib/datasets/types";
 
 const supabase = getSupabaseForDynamicTables();
 

@@ -1,13 +1,16 @@
 <script lang="ts">
-	import { FormBuilder } from "$lib/components/form-builder";
-	import { FormRenderer } from "$lib/components/form-renderer";
-	import { createValibotSchema, createDefaultValues } from "$lib/forms/schema";
+	import {
+		createDefaultValues,
+		createValibotSchema,
+		FormBuilder,
+		FormRenderer,
+		type FormDefinition,
+	} from "$lib/components/dynamic-forms";
+	import * as Card from "$lib/components/shadcn-svelte/card";
+	import { CopyButton } from "$lib/components/shadcn-svelte/copy-button";
+	import * as Tabs from "$lib/components/shadcn-svelte/tabs";
 	import { defaults } from "sveltekit-superforms";
 	import { valibot } from "sveltekit-superforms/adapters";
-	import * as Tabs from "$lib/components/ui/tabs";
-	import * as Card from "$lib/components/ui/card";
-	import { CopyButton } from "$lib/components/ui/copy-button";
-	import type { FormDefinition } from "$lib/forms/types";
 
 	let definition = $state<FormDefinition>({
 		id: crypto.randomUUID(),

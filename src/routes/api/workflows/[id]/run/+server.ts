@@ -1,9 +1,9 @@
-import { json, error } from "@sveltejs/kit";
-import type { RequestHandler } from "./$types";
+import { executeWorkflow } from "$lib/components/workflow-builder/engine";
+import type { WorkflowDefinition } from "$lib/components/workflow-builder/types";
 import { supabase } from "$lib/database/supabase.client";
 import type { Json } from "$lib/database/supabase.types";
-import { executeWorkflow } from "$lib/workflows/engine";
-import type { WorkflowDefinition } from "$lib/workflows/types";
+import { error, json } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
 
 export const POST: RequestHandler = async ({ params, request }) => {
 	const { id } = params;

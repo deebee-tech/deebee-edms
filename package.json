@@ -18,7 +18,10 @@
 	"pnpm": {
 		"overrides": {
 			"@clerk/shared": "4.4.0"
-		}
+		},
+		"onlyBuiltDependencies": [
+			"better-sqlite3"
+		]
 	},
 	"scripts": {
 		"build": "vite build",
@@ -76,12 +79,15 @@
 		"@tailwindcss/vite": "^4.2.2",
 		"@tanstack/table-core": "^8.21.3",
 		"@tanstack/virtual-core": "^3.13.23",
+		"@types/better-sqlite3": "^7.6.13",
+		"@types/mssql": "^9.1.11",
 		"@types/node": "^24.12.2",
 		"@vitest/browser-playwright": "^4.1.2",
 		"@xyflow/svelte": "^1.5.2",
 		"@zxcvbn-ts/core": "^3.0.4",
 		"@zxcvbn-ts/language-common": "^3.0.4",
 		"@zxcvbn-ts/language-en": "^3.0.2",
+		"better-sqlite3": "^12.8.0",
 		"bits-ui": "^2.17.2",
 		"clsx": "^2.1.1",
 		"country-flag-icons": "^1.6.15",
@@ -97,6 +103,8 @@
 		"layerchart": "^2.0.0-next.50",
 		"mdsvex": "^0.12.7",
 		"mode-watcher": "^1.1.0",
+		"mssql": "^12.2.1",
+		"mysql2": "^3.20.0",
 		"package-manager-detector": "^1.6.0",
 		"paneforge": "^1.0.2",
 		"playwright": "^1.59.1",

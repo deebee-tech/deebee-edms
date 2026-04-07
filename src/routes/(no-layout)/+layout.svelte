@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { LanguageSwitcher } from "$lib/components/ui/language-switcher";
-	import { ThemeSelector } from "$lib/components/ui/theme-selector";
+	import { LanguageSwitcher } from "$lib/components/shadcn-svelte/language-switcher";
+	import { ThemeSelector } from "$lib/components/shadcn-svelte/theme-selector";
 
 	let { children } = $props();
 </script>

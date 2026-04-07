@@ -13,10 +13,10 @@
 	} from "@xyflow/svelte";
 	import "@xyflow/svelte/dist/style.css";
 
-	import { nodeRegistry } from "$lib/workflows/node-registry";
-	import type { NodeType } from "$lib/workflows/types";
 	import WorkflowEdge from "./custom-edges/workflow-edge.svelte";
 	import WorkflowNode from "./custom-nodes/workflow-node.svelte";
+	import { nodeRegistry } from "./node-registry";
+	import type { NodeType } from "./types";
 
 	let {
 		nodes,

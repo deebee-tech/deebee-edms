@@ -1,27 +1,22 @@
 <script lang="ts">
-	import * as Table from "$lib/components/ui/table";
-	import { Input } from "$lib/components/ui/input";
-	import { Button } from "$lib/components/ui/button";
-	import { Checkbox } from "$lib/components/ui/checkbox";
-	import * as Select from "$lib/components/ui/select";
-	import { ScrollArea } from "$lib/components/ui/scroll-area";
+	import { Button } from "$lib/components/shadcn-svelte/button";
+	import { Checkbox } from "$lib/components/shadcn-svelte/checkbox";
+	import { Input } from "$lib/components/shadcn-svelte/input";
+	import * as Select from "$lib/components/shadcn-svelte/select";
+	import * as Table from "$lib/components/shadcn-svelte/table";
+	import GripVerticalIcon from "@lucide/svelte/icons/grip-vertical";
 	import PlusIcon from "@lucide/svelte/icons/plus";
 	import XIcon from "@lucide/svelte/icons/x";
-	import GripVerticalIcon from "@lucide/svelte/icons/grip-vertical";
-	import type { DatasetField, DatasetFilter, DatasetTable } from "$lib/datasets/types";
+	import type { DatasetField, DatasetTable } from "./types";
 
 	let {
 		fields,
-		filters,
 		tables,
 		onfieldschange,
-		onfilterschange,
 	}: {
 		fields: DatasetField[];
-		filters: DatasetFilter[];
 		tables: DatasetTable[];
 		onfieldschange: (fields: DatasetField[]) => void;
-		onfilterschange: (filters: DatasetFilter[]) => void;
 	} = $props();
 
 	const aggregationOptions = [
@@ -39,21 +34,14 @@
 		{ value: "desc", label: "DESC" },
 	];
 
-	const operatorOptions = [
-		{ value: "eq", label: "=" },
-		{ value: "neq", label: "!=" },
-		{ value: "gt", label: ">" },
-		{ value: "gte", label: ">=" },
-		{ value: "lt", label: "<" },
-		{ value: "lte", label: "<=" },
-		{ value: "contains", label: "LIKE" },
-		{ value: "is_null", label: "IS NULL" },
-		{ value: "is_not_null", label: "IS NOT NULL" },
-	];
-
 	function getTableName(tableId: string): string {
 		const table = tables.find((t) => t.id === tableId);
 		return table?.alias || table?.tableName || tableId;
+	}
+
+	function fieldQualifiedLabel(field: DatasetField): string {
+		const tablePart = getTableName(field.tableId);
+		return field.columnName ? `${tablePart}.${field.columnName}` : "";
 	}
 
 	function updateField(index: number, updates: Partial<DatasetField>) {
@@ -62,9 +50,7 @@
 	}
 
 	function removeField(index: number) {
-		const fieldId = fields[index].id;
 		onfieldschange(fields.filter((_, i) => i !== index));
-		onfilterschange(filters.filter((f) => !(f.tableId === fields[index].tableId && f.columnName === fields[index].columnName)));
 	}
 
 	function addEmptyField() {
@@ -75,38 +61,6 @@
 			visible: true,
 		};
 		onfieldschange([...fields, newField]);
-	}
-
-	function getFilter(field: DatasetField): DatasetFilter | undefined {
-		return filters.find((f) => f.tableId === field.tableId && f.columnName === field.columnName);
-	}
-
-	function updateFilter(field: DatasetField, operator: string, value: string) {
-		const existing = filters.findIndex(
-			(f) => f.tableId === field.tableId && f.columnName === field.columnName,
-		);
-
-		if (!operator && !value) {
-			if (existing >= 0) {
-				onfilterschange(filters.filter((_, i) => i !== existing));
-			}
-			return;
-		}
-
-		const filter: DatasetFilter = {
-			id: existing >= 0 ? filters[existing].id : crypto.randomUUID(),
-			tableId: field.tableId,
-			columnName: field.columnName,
-			operator: operator || "eq",
-			value,
-			logic: "and",
-		};
-
-		if (existing >= 0) {
-			onfilterschange(filters.map((f, i) => (i === existing ? filter : f)));
-		} else {
-			onfilterschange([...filters, filter]);
-		}
 	}
 
 	function handleDragOver(event: DragEvent) {
@@ -129,9 +83,7 @@
 			const table = tables.find((t) => t.tableName === colData.tableName && t.schema === colData.schema);
 			if (!table) return;
 
-			const alreadyExists = fields.some(
-				(f) => f.tableId === table.id && f.columnName === colData.columnName,
-			);
+			const alreadyExists = fields.some((f) => f.tableId === table.id && f.columnName === colData.columnName);
 			if (alreadyExists) return;
 
 			const newField: DatasetField = {
@@ -147,52 +99,48 @@
 	}
 </script>
 
-<div
-	class="flex h-full flex-col"
-	role="presentation"
-	ondragover={handleDragOver}
-	ondrop={handleDrop}
->
-	<div class="flex items-center justify-between border-b px-3 py-1.5">
+<div class="flex h-full min-h-0 flex-col overflow-hidden" role="presentation" ondragover={handleDragOver} ondrop={handleDrop}>
+	<div class="flex shrink-0 items-center justify-between border-b px-3 py-1.5">
 		<h4 class="text-xs font-semibold">Fields</h4>
 		<Button variant="ghost" size="sm" class="h-6 text-xs" onclick={addEmptyField}>
 			<PlusIcon class="mr-1 size-3" />
 			Add
 		</Button>
 	</div>
-	<ScrollArea class="flex-1" orientation="both">
-		<Table.Root class="text-xs">
-			<Table.Header>
-				<Table.Row class="h-7">
-					<Table.Head class="w-6 px-1"></Table.Head>
-					<Table.Head class="min-w-[140px]">Field</Table.Head>
-					<Table.Head class="min-w-[100px]">Table</Table.Head>
-					<Table.Head class="min-w-[100px]">Alias</Table.Head>
-					<Table.Head class="w-12 text-center">Show</Table.Head>
-					<Table.Head class="min-w-[80px]">Sort</Table.Head>
-					<Table.Head class="min-w-[80px]">Aggregate</Table.Head>
-					<Table.Head class="min-w-[70px]">Operator</Table.Head>
-					<Table.Head class="min-w-[100px]">Criteria</Table.Head>
-					<Table.Head class="w-8"></Table.Head>
-				</Table.Row>
-			</Table.Header>
+	<div class="min-h-0 flex-1 overflow-auto">
+		<table class="w-full caption-bottom text-xs">
+			<thead class="sticky top-0 z-10 border-b bg-background [&_tr]:border-b">
+				<tr class="h-7">
+					<th class="w-6 px-1 text-left text-xs font-medium text-muted-foreground"></th>
+					<th class="min-w-[160px] px-2 text-left text-xs font-medium text-muted-foreground">Field</th>
+					<th class="min-w-[100px] px-2 text-left text-xs font-medium text-muted-foreground">Alias</th>
+					<th class="w-12 px-2 text-xs font-medium text-muted-foreground">
+						<div class="flex w-full justify-center">Show</div>
+					</th>
+					<th class="min-w-[100px] px-2 text-xs font-medium text-muted-foreground">
+						<div class="flex w-full justify-center">Sort</div>
+					</th>
+					<th class="min-w-[100px] px-2 text-xs font-medium text-muted-foreground">
+						<div class="flex w-full justify-center">Aggregate</div>
+					</th>
+					<th class="w-8"></th>
+				</tr>
+			</thead>
 			<Table.Body>
 				{#each fields as field, i (field.id)}
-					{@const filter = getFilter(field)}
+					{@const qualifiedFieldLabel = fieldQualifiedLabel(field)}
 					<Table.Row class="h-8">
 						<Table.Cell class="px-1">
 							<GripVerticalIcon class="size-3 cursor-grab text-muted-foreground/40" />
 						</Table.Cell>
 						<Table.Cell class="p-1">
-							<Input
-								class="h-6 text-xs"
-								value={field.columnName}
-								placeholder="column"
-								oninput={(e) => updateField(i, { columnName: e.currentTarget.value })}
-							/>
-						</Table.Cell>
-						<Table.Cell class="p-1">
-							<span class="truncate text-muted-foreground">{getTableName(field.tableId)}</span>
+							<span class="block truncate text-xs" title={qualifiedFieldLabel || undefined}>
+								{#if qualifiedFieldLabel}
+									{qualifiedFieldLabel}
+								{:else}
+									<span class="text-muted-foreground">—</span>
+								{/if}
+							</span>
 						</Table.Cell>
 						<Table.Cell class="p-1">
 							<Input
@@ -202,73 +150,55 @@
 								oninput={(e) => updateField(i, { alias: e.currentTarget.value || undefined })}
 							/>
 						</Table.Cell>
-						<Table.Cell class="p-1 text-center">
-							<Checkbox
-								checked={field.visible}
-								onCheckedChange={(checked) => updateField(i, { visible: checked === true })}
-							/>
-						</Table.Cell>
 						<Table.Cell class="p-1">
-							<Select.Root
-								type="single"
-								value={field.sortDirection ?? ""}
-								onValueChange={(val) =>
-									updateField(i, {
-										sortDirection: val === "" ? undefined : (val as "asc" | "desc"),
-									})}
-							>
-								<Select.Trigger class="h-6 text-xs">
-									{sortOptions.find((o) => o.value === (field.sortDirection ?? ""))?.label ?? "None"}
-								</Select.Trigger>
-								<Select.Content>
-									{#each sortOptions as opt (opt.value)}
-										<Select.Item value={opt.value} class="text-xs">{opt.label}</Select.Item>
-									{/each}
-								</Select.Content>
-							</Select.Root>
+							<div class="flex w-full justify-center">
+								<Checkbox
+									checked={field.visible}
+									onCheckedChange={(checked) => updateField(i, { visible: checked === true })}
+								/>
+							</div>
 						</Table.Cell>
-						<Table.Cell class="p-1">
-							<Select.Root
-								type="single"
-								value={field.aggregation ?? ""}
-								onValueChange={(val) =>
-									updateField(i, {
-										aggregation: val === "" ? undefined : (val as DatasetField["aggregation"]),
-									})}
-							>
-								<Select.Trigger class="h-6 text-xs">
-									{aggregationOptions.find((o) => o.value === (field.aggregation ?? ""))?.label ?? "None"}
-								</Select.Trigger>
-								<Select.Content>
-									{#each aggregationOptions as opt (opt.value)}
-										<Select.Item value={opt.value} class="text-xs">{opt.label}</Select.Item>
-									{/each}
-								</Select.Content>
-							</Select.Root>
+						<Table.Cell class="p-1 align-middle">
+							<div class="flex w-full justify-center">
+								<Select.Root
+									type="single"
+									value={field.sortDirection ?? ""}
+									onValueChange={(val) =>
+										updateField(i, {
+											sortDirection: val === "" ? undefined : (val as "asc" | "desc"),
+										})}
+								>
+									<Select.Trigger class="h-6 w-[80%] min-w-0 max-w-full justify-between text-xs">
+										{sortOptions.find((o) => o.value === (field.sortDirection ?? ""))?.label ?? "None"}
+									</Select.Trigger>
+									<Select.Content>
+										{#each sortOptions as opt (opt.value)}
+											<Select.Item value={opt.value} class="text-xs">{opt.label}</Select.Item>
+										{/each}
+									</Select.Content>
+								</Select.Root>
+							</div>
 						</Table.Cell>
-						<Table.Cell class="p-1">
-							<Select.Root
-								type="single"
-								value={filter?.operator ?? ""}
-								onValueChange={(val) => updateFilter(field, val, filter?.value ?? "")}
-							>
-								<Select.Trigger class="h-6 text-xs">
-									{operatorOptions.find((o) => o.value === (filter?.operator ?? ""))?.label ?? "--"}
-								</Select.Trigger>
-								<Select.Content>
-									{#each operatorOptions as opt (opt.value)}
-										<Select.Item value={opt.value} class="text-xs">{opt.label}</Select.Item>
-									{/each}
-								</Select.Content>
-							</Select.Root>
-						</Table.Cell>
-						<Table.Cell class="p-1">
-							<Input
-								class="h-6 text-xs"
-								value={filter?.value ?? ""}
-								placeholder="value"
-								oninput={(e) => updateFilter(field, filter?.operator ?? "eq", e.currentTarget.value)}
-							/>
+						<Table.Cell class="p-1 align-middle">
+							<div class="flex w-full justify-center">
+								<Select.Root
+									type="single"
+									value={field.aggregation ?? ""}
+									onValueChange={(val) =>
+										updateField(i, {
+											aggregation: val === "" ? undefined : (val as DatasetField["aggregation"]),
+										})}
+								>
+									<Select.Trigger class="h-6 w-[80%] min-w-0 max-w-full justify-between text-xs">
+										{aggregationOptions.find((o) => o.value === (field.aggregation ?? ""))?.label ?? "None"}
+									</Select.Trigger>
+									<Select.Content>
+										{#each aggregationOptions as opt (opt.value)}
+											<Select.Item value={opt.value} class="text-xs">{opt.label}</Select.Item>
+										{/each}
+									</Select.Content>
+								</Select.Root>
+							</div>
 						</Table.Cell>
 						<Table.Cell class="p-1">
 							<Button
@@ -284,12 +214,12 @@
 				{/each}
 				{#if fields.length === 0}
 					<Table.Row>
-						<Table.Cell colspan={10} class="py-6 text-center text-muted-foreground">
+						<Table.Cell colspan={7} class="py-6 text-center text-muted-foreground">
 							Double-click columns on the canvas or drag them here to add fields
 						</Table.Cell>
 					</Table.Row>
 				{/if}
 			</Table.Body>
-		</Table.Root>
-	</ScrollArea>
+		</table>
+	</div>
 </div>

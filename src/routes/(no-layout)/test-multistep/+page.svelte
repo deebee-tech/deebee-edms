@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { FormRenderer } from "$lib/components/form-renderer";
-	import * as Card from "$lib/components/ui/card";
+	import { FormRenderer } from "$lib/components/dynamic-forms";
+	import * as Card from "$lib/components/shadcn-svelte/card";
 	import type { PageData } from "./$types";
 
 	let { data }: { data: PageData } = $props();

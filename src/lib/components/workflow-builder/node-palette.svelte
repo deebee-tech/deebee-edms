@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { nodeCategories, nodeRegistry, type NodeRegistryEntry } from "$lib/workflows/node-registry";
-	import { NODE_TYPES, type NodeCategory, type NodeType } from "$lib/workflows/types";
+	import { nodeCategories, nodeRegistry, type NodeRegistryEntry } from "./node-registry";
+	import { NODE_TYPES, type NodeCategory, type NodeType } from "./types";
 
 	let {
 		onadd,

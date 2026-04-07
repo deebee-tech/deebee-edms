@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { DatasetBuilder } from "$lib/components/dataset-builder";
-	import SqlPreviewDialog from "$lib/components/dataset-builder/sql-preview-dialog.svelte";
-	import * as Tabs from "$lib/components/ui/tabs";
-	import * as Card from "$lib/components/ui/card";
-	import * as Code from "$lib/components/ui/code";
-	import { CopyButton } from "$lib/components/ui/copy-button";
-	import { generateSql } from "$lib/datasets/sql-generator";
-	import type { DatasetDefinition } from "$lib/datasets/types";
+	import { generateSql } from "$lib/components/dataset-builder/sql-generator";
+	import type { DatasetDefinition } from "$lib/components/dataset-builder/types";
+	import * as Card from "$lib/components/shadcn-svelte/card";
+	import * as Code from "$lib/components/shadcn-svelte/code";
+	import { CopyButton } from "$lib/components/shadcn-svelte/copy-button";
+	import * as Tabs from "$lib/components/shadcn-svelte/tabs";
 	import { sampleDatasetDefinition } from "./sample-dataset-definition";
 	import { sampleSchema } from "./sample-schema";
 
@@ -38,11 +37,7 @@
 
 		<Tabs.Content value="builder" class="mt-4">
 			<div class="h-[calc(100vh-220px)] min-h-[600px]">
-				<DatasetBuilder
-					{definition}
-					schema={sampleSchema}
-					ondefinitionchange={handleDefinitionChange}
-				/>
+				<DatasetBuilder {definition} schema={sampleSchema} ondefinitionchange={handleDefinitionChange} />
 			</div>
 		</Tabs.Content>
 
@@ -53,9 +48,7 @@
 						<Card.Title>Generated SQL</Card.Title>
 						<CopyButton text={generatedSql.sql} />
 					</div>
-					<Card.Description>
-						This SQL is generated in real time from the dataset definition above
-					</Card.Description>
+					<Card.Description>This SQL is generated in real time from the dataset definition above</Card.Description>
 				</Card.Header>
 				<Card.Content>
 					<Code.Root code={generatedSql.sql} lang="sql" hideLines>

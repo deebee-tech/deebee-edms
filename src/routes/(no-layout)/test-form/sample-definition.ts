@@ -1,4 +1,4 @@
-import type { FormDefinition } from "$lib/forms/types";
+import type { FormDefinition } from "$lib/components/dynamic-forms";
 
 export const sampleFormDefinition: FormDefinition = {
 	id: "sample-contact",

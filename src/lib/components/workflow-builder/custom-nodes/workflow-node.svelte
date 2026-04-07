@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Handle, Position, type NodeProps } from "@xyflow/svelte";
-	import { nodeRegistry } from "$lib/workflows/node-registry";
-	import type { NodeType } from "$lib/workflows/types";
+	import { nodeRegistry } from "../node-registry";
+	import type { NodeType } from "../types";
 
 	let { data, id, selected, type: nodeType }: NodeProps = $props();
 

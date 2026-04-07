@@ -1,8 +1,8 @@
 <script lang="ts" module>
 	import DatabaseIcon from "@lucide/svelte/icons/database";
 	import LayersIcon from "@lucide/svelte/icons/layers";
-	import NetworkIcon from "@lucide/svelte/icons/network";
 	import LayoutDashboardIcon from "@lucide/svelte/icons/layout-dashboard";
+	import NetworkIcon from "@lucide/svelte/icons/network";
 
 	const data = {
 		user: {
@@ -36,10 +36,10 @@
 </script>
 
 <script lang="ts">
-	import { page } from "$app/state";
 	import { resolve } from "$app/paths";
+	import { page } from "$app/state";
 	import type { Pathname } from "$app/types";
-	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+	import * as Sidebar from "$lib/components/shadcn-svelte/sidebar/index.js";
 	import CommandIcon from "@lucide/svelte/icons/command";
 	import type { ComponentProps } from "svelte";
 	import NavUser from "./nav-user.svelte";

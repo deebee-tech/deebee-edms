@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { Button } from "$lib/components/ui/button";
-	import * as Field from "$lib/components/ui/field";
-	import { Input } from "$lib/components/ui/input";
-	import * as Select from "$lib/components/ui/select";
-	import { Separator } from "$lib/components/ui/separator";
-	import { Textarea } from "$lib/components/ui/textarea";
-	import { nodeRegistry } from "$lib/workflows/node-registry";
-	import type { WorkflowNodeDefinition } from "$lib/workflows/types";
+	import { Button } from "$lib/components/shadcn-svelte/button";
+	import * as Field from "$lib/components/shadcn-svelte/field";
+	import { Input } from "$lib/components/shadcn-svelte/input";
+	import * as Select from "$lib/components/shadcn-svelte/select";
+	import { Separator } from "$lib/components/shadcn-svelte/separator";
+	import { Textarea } from "$lib/components/shadcn-svelte/textarea";
 	import PlusIcon from "@lucide/svelte/icons/plus";
 	import TrashIcon from "@lucide/svelte/icons/trash";
+	import { nodeRegistry } from "./node-registry";
+	import type { WorkflowNodeDefinition } from "./types";
 
 	let {
 		node,

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Button } from "$lib/components/ui/button";
-	import * as Field from "$lib/components/ui/field";
-	import { Input } from "$lib/components/ui/input";
-	import * as Select from "$lib/components/ui/select";
-	import type { GlobalVariable, GlobalVariableType } from "$lib/workflows/types";
+	import { Button } from "$lib/components/shadcn-svelte/button";
+	import * as Field from "$lib/components/shadcn-svelte/field";
+	import { Input } from "$lib/components/shadcn-svelte/input";
+	import * as Select from "$lib/components/shadcn-svelte/select";
 	import PlusIcon from "@lucide/svelte/icons/plus";
 	import TrashIcon from "@lucide/svelte/icons/trash";
+	import type { GlobalVariable, GlobalVariableType } from "./types";
 
 	let {
 		variables,

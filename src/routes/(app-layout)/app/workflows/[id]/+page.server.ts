@@ -1,8 +1,8 @@
+import type { WorkflowDefinition } from "$lib/components/workflow-builder/types";
 import { supabase } from "$lib/database/supabase.client";
 import type { Json } from "$lib/database/supabase.types";
 import { error, fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
-import type { WorkflowDefinition } from "$lib/workflows/types";
 
 export const load: PageServerLoad = async ({ params }) => {
 	const { data: workflow, error: dbError } = await supabase.from("workflows").select("*").eq("id", params.id).single();
