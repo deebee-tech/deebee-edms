@@ -10,7 +10,7 @@
 	class={cn(
 		"text-sm font-medium",
 		"group-data-[orientation=vertical]/stepper-nav:text-left",
-		"group-data-[orientation=horizontal]/stepper-nav:text-center",
+		"group-data-[orientation=horizontal]/stepper-nav:w-full group-data-[orientation=horizontal]/stepper-nav:text-center",
 		className,
 	)}
 	{...rest}

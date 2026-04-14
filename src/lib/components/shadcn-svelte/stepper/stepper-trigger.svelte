@@ -27,7 +27,7 @@
 	data-slot="stepper-trigger"
 	class={cn(
 		"group/stepper-trigger z-1 flex",
-		"group-data-[orientation=horizontal]/stepper-nav:flex-col",
+		"group-data-[orientation=horizontal]/stepper-nav:w-full group-data-[orientation=horizontal]/stepper-nav:flex-col group-data-[orientation=horizontal]/stepper-nav:items-center group-data-[orientation=horizontal]/stepper-nav:gap-1.5",
 		"group-data-[orientation=vertical]/stepper-nav:flex-row group-data-[orientation=vertical]/stepper-nav:gap-4",
 		className,
 	)}

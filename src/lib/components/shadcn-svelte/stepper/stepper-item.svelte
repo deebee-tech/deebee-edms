@@ -16,13 +16,7 @@
 
 <div
 	data-slot="stepper-item"
-	class={cn(
-		"group/stepper-item relative flex",
-		{
-			"flex-1": !stepperItemState.isLast,
-		},
-		className,
-	)}
+	class={cn("group/stepper-item relative flex min-w-0 flex-1", className)}
 	{...stepperItemState.props}
 	{...rest}
 >

@@ -13,5 +13,6 @@ export async function validateDynamicForm(
 	if (request) {
 		return superValidate(request, valibot(schema));
 	}
-	return superValidate(defaults, valibot(schema));
+	// Initial page load: keep merged defaults but do not surface validation errors until submit.
+	return superValidate(defaults, valibot(schema), { errors: false });
 }

@@ -9,6 +9,7 @@
 </script>
 
 <script lang="ts">
+	import { dev } from "$app/environment";
 	import { m } from "$lib/paraglide/messages";
 	import { getLocale } from "$lib/paraglide/runtime";
 	import { CookieStore, setCookieStore } from "$lib/stores/cookies.svelte";
@@ -56,6 +57,6 @@
 </svelte:head>
 
 <ModeWatcher />
-<ClerkProvider {ui} localization={clerkLocalization}>
+<ClerkProvider {ui} localization={clerkLocalization} telemetry={dev ? { disabled: true } : undefined}>
 	{@render children()}
 </ClerkProvider>
