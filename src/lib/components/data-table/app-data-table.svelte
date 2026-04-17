@@ -34,6 +34,14 @@
 		rowHeight?: number;
 		/** Whether to sync filter/sort state to URL search params. Defaults to true. */
 		syncUrl?: boolean;
+		/**
+		 * Freeze column widths and stick the header row to the top of the
+		 * scroll container. When true (default) the table uses
+		 * `table-layout: fixed` so columns don't shift while the virtualizer
+		 * recycles rows, and the header row sticks to the top of the
+		 * scrollable area on vertical scroll.
+		 */
+		freezeColumns?: boolean;
 		/** Optional snippet for row actions (rendered as the last cell of each row). */
 		actions?: Snippet<[TData]>;
 		/** Optional snippet for an empty state. */
@@ -51,6 +59,7 @@
 		tableHeight = "600px",
 		rowHeight = 40,
 		syncUrl = true,
+		freezeColumns = true,
 		actions,
 		empty,
 		toolbar,
@@ -249,6 +258,21 @@
 		return row.getVisibleCells();
 	}
 
+	const ACTIONS_COL_WIDTH = 96;
+
+	const totalColumnsWidth = $derived.by(() => {
+		let total = 0;
+		for (const col of table.getAllLeafColumns()) total += col.getSize();
+		if (actions) total += ACTIONS_COL_WIDTH;
+		return total;
+	});
+
+	const tableStyle = $derived(
+		freezeColumns
+			? `table-layout: fixed; width: 100%; min-width: ${totalColumnsWidth}px;`
+			: `width: 100%; min-width: ${totalColumnsWidth}px;`,
+	);
+
 	// ── Initial Load ──
 
 	onMount(() => {
@@ -290,8 +314,8 @@
 		{/if}
 	{:else}
 		<div bind:this={scrollContainerRef} class="overflow-auto" style="height: {tableHeight};">
-			<Table.Root>
-				<Table.Header class="sticky top-0 z-10 bg-background">
+			<table class="caption-bottom text-sm" style={tableStyle}>
+				<Table.Header class="sticky top-0 z-10 bg-background shadow-[0_1px_0_0_var(--border)]">
 					{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
 						<Table.Row>
 							{#each headerGroup.headers as header (header.id)}
@@ -339,7 +363,7 @@
 								</Table.Head>
 							{/each}
 							{#if actions}
-								<Table.Head class="w-24">Actions</Table.Head>
+								<Table.Head style="width: {ACTIONS_COL_WIDTH}px;">Actions</Table.Head>
 							{/if}
 						</Table.Row>
 					{/each}
@@ -357,12 +381,15 @@
 							{#if row}
 								<Table.Row data-index={virtualRow.index}>
 									{#each orderedCells(row) as cell (cell.id)}
-										<Table.Cell>
+										<Table.Cell
+											class="overflow-hidden text-ellipsis whitespace-nowrap"
+											style="width: {cell.column.getSize()}px;"
+										>
 											<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
 										</Table.Cell>
 									{/each}
 									{#if actions}
-										<Table.Cell>
+										<Table.Cell style="width: {ACTIONS_COL_WIDTH}px;">
 											{@render actions(row.original)}
 										</Table.Cell>
 									{/if}
@@ -380,7 +407,7 @@
 						{/if}
 					{/if}
 				</Table.Body>
-			</Table.Root>
+			</table>
 
 			<!-- Infinite scroll sentinel -->
 			<div bind:this={sentinel} class="h-1"></div>

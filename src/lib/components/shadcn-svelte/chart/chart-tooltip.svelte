@@ -137,9 +137,7 @@
 						{:else if !hideIndicator}
 							<div
 								style:border-color={indicatorColor}
-								style:background-color={indicator === "dashed"
-									? "transparent"
-									: indicatorColor}
+								style:background-color={indicator === "dashed" ? "transparent" : indicatorColor}
 								class={cn("shrink-0 rounded-xs border", {
 									"size-2.5": indicator === "dot",
 									"h-full w-1": indicator === "line",

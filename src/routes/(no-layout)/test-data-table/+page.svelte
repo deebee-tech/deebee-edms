@@ -3,6 +3,8 @@
 	import { createApiProvider, sveltekitPreset } from "$lib/components/data-table/providers/api-provider.js";
 	import { createStaticProvider } from "$lib/components/data-table/providers/static-provider.js";
 	import type { ColumnMeta } from "$lib/components/data-table/types.js";
+	import * as Code from "$lib/components/shadcn-svelte/code";
+	import { formatDisplaySql } from "$lib/format-display-sql";
 	import { Badge } from "$lib/components/shadcn-svelte/badge";
 	import { renderSnippet } from "$lib/components/shadcn-svelte/data-table";
 	import * as Tabs from "$lib/components/shadcn-svelte/tabs";
@@ -102,6 +104,13 @@
 	});
 
 	let latestSql = $state<{ dataSql: string; countSql: string } | null>(null);
+
+	const formattedLatestDataSql = $derived(
+		latestSql ? formatDisplaySql(latestSql.dataSql, "postgres") : "",
+	);
+	const formattedLatestCountSql = $derived(
+		latestSql ? formatDisplaySql(latestSql.countSql, "postgres") : "",
+	);
 </script>
 
 {#snippet salarySnippet({ value }: { value: number })}
@@ -176,11 +185,25 @@
 					<div class="space-y-3">
 						<div>
 							<p class="mb-1 text-xs font-medium text-muted-foreground">Data Query:</p>
-							<pre class="overflow-x-auto rounded bg-background p-3 text-xs">{latestSql.dataSql}</pre>
+							<div class="overflow-hidden rounded-lg border">
+								<Code.Root
+									code={formattedLatestDataSql}
+									lang="sql"
+									hideLines
+									class="max-h-[min(18rem,40vh)] border-0"
+								/>
+							</div>
 						</div>
 						<div>
 							<p class="mb-1 text-xs font-medium text-muted-foreground">Count Query:</p>
-							<pre class="overflow-x-auto rounded bg-background p-3 text-xs">{latestSql.countSql}</pre>
+							<div class="overflow-hidden rounded-lg border">
+								<Code.Root
+									code={formattedLatestCountSql}
+									lang="sql"
+									hideLines
+									class="max-h-[min(18rem,40vh)] border-0"
+								/>
+							</div>
 						</div>
 					</div>
 				</div>

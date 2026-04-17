@@ -2,6 +2,7 @@
 	import { DatasetBuilder } from "$lib/components/dataset-builder";
 	import { generateSql } from "$lib/components/dataset-builder/sql-generator";
 	import type { DatasetDefinition } from "$lib/components/dataset-builder/types";
+	import { formatDisplaySql } from "$lib/format-display-sql";
 	import { Button } from "$lib/components/shadcn-svelte/button";
 	import * as Card from "$lib/components/shadcn-svelte/card";
 	import * as Code from "$lib/components/shadcn-svelte/code";
@@ -20,6 +21,9 @@
 
 	const definitionJson = $derived(JSON.stringify(definition, null, 2));
 	const generatedSql = $derived(generateSql(definition));
+	const formattedGeneratedSql = $derived(
+		formatDisplaySql(generatedSql.sql, definition.engine ?? "postgres"),
+	);
 
 	function handleDefinitionChange(updated: DatasetDefinition) {
 		definition = updated;
@@ -83,9 +87,9 @@
 					<Card.Description>This SQL is generated in real time from the dataset definition above</Card.Description>
 				</Card.Header>
 				<Card.Content>
-					<Code.Root code={generatedSql.sql} lang="sql" hideLines>
-						<Code.CopyButton class="absolute top-2 right-2" />
-					</Code.Root>
+					<div class="relative min-h-[min(20rem,50vh)] overflow-hidden rounded-lg border">
+						<Code.Root code={formattedGeneratedSql} lang="sql" hideLines class="max-h-[min(28rem,55vh)] border-0" />
+					</div>
 				</Card.Content>
 			</Card.Root>
 		</Tabs.Content>
