@@ -10,7 +10,6 @@
 	import PanelLeftOpenIcon from "@lucide/svelte/icons/panel-left-open";
 	import PlusIcon from "@lucide/svelte/icons/plus";
 	import UsersIcon from "@lucide/svelte/icons/users";
-	import { untrack } from "svelte";
 	import AudienceGroupComponent from "./audience-group.svelte";
 	import TagTypePalette from "./tag-type-palette.svelte";
 	import {
@@ -22,87 +21,54 @@
 	} from "./types.js";
 
 	let {
-		definition,
+		definition = $bindable(),
 		catalog,
 		matchedCount,
 		totalCount,
-		ondefinitionchange,
 	}: {
 		definition: AudienceDefinition;
 		catalog: AudienceCatalog;
 		/** Optional live audience-size hint shown in the header. */
 		matchedCount?: number;
 		totalCount?: number;
-		ondefinitionchange?: (definition: AudienceDefinition) => void;
 	} = $props();
 
-	let audienceName = $state(untrack(() => definition.name));
-	let groups = $state<AudienceGroup[]>(
-		untrack(() => (definition.groups.length > 0 ? cloneGroups(definition.groups) : [createEmptyGroup()])),
-	);
-
-	let changeCounter = $state(0);
+	const groups = $derived(definition.groups);
 
 	let palettePane = $state<{ collapse: () => void; expand: () => void; isCollapsed: () => boolean } | null>(null);
 	let paletteCollapsed = $state(false);
 
-	function cloneGroups(g: AudienceGroup[]): AudienceGroup[] {
-		return g.map((grp) => ({
-			id: grp.id,
-			name: grp.name,
-			logic: grp.logic,
-			conditions: grp.conditions.map((c) => ({
-				id: c.id,
-				mode: c.mode,
-				tagTypeId: c.tagTypeId,
-				tagIds: [...c.tagIds],
-			})),
-		}));
+	function ensureNonEmptyGroups() {
+		if (definition.groups.length === 0) {
+			definition.groups = [createEmptyGroup()];
+		}
 	}
 
 	$effect(() => {
-		const _ = changeCounter;
-		const snapshot: AudienceDefinition = {
-			id: untrack(() => definition.id),
-			name: audienceName,
-			description: untrack(() => definition.description),
-			version: untrack(() => definition.version),
-			objectType: untrack(() => definition.objectType),
-			groups: cloneGroups(groups),
-		};
-		if (_ === 0) return;
-		untrack(() => ondefinitionchange?.(snapshot));
+		ensureNonEmptyGroups();
 	});
 
-	function notifyChange() {
-		changeCounter++;
-	}
-
 	function updateGroup(next: AudienceGroup) {
-		groups = groups.map((g) => (g.id === next.id ? next : g));
-		notifyChange();
+		definition.groups = definition.groups.map((g) => (g.id === next.id ? next : g));
 	}
 
 	function deleteGroup(id: string) {
-		groups = groups.filter((g) => g.id !== id);
-		if (groups.length === 0) groups = [createEmptyGroup()];
-		notifyChange();
+		definition.groups = definition.groups.filter((g) => g.id !== id);
+		if (definition.groups.length === 0) definition.groups = [createEmptyGroup()];
 	}
 
 	function addGroup() {
-		groups = [...groups, createEmptyGroup()];
-		notifyChange();
+		definition.groups = [...definition.groups, createEmptyGroup()];
 	}
 
 	function addConditionToLastGroup(tagTypeId: string, tagId?: string) {
-		if (groups.length === 0) groups = [createEmptyGroup()];
-		const lastIdx = groups.length - 1;
-		const last = groups[lastIdx];
+		if (definition.groups.length === 0) definition.groups = [createEmptyGroup()];
+		const lastIdx = definition.groups.length - 1;
+		const last = definition.groups[lastIdx];
 		const resolvedTagId = tagId ?? catalog.tags.find((t) => t.tagTypeId === tagTypeId)?.id;
 		const newCond = createEmptyCondition(tagTypeId, resolvedTagId);
 		const updated: AudienceGroup = { ...last, conditions: [...last.conditions, newCond] };
-		groups = [...groups.slice(0, lastIdx), updated];
-		notifyChange();
+		definition.groups = [...definition.groups.slice(0, lastIdx), updated];
 	}
 
 	function togglePalette() {
@@ -205,9 +171,8 @@
 								<input
 									id="audience-name-input"
 									class="min-w-0 flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-semibold shadow-xs transition-colors outline-none placeholder:font-normal placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
-									bind:value={audienceName}
+									bind:value={definition.name}
 									placeholder="Untitled Audience"
-									oninput={notifyChange}
 								/>
 							</div>
 

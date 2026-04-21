@@ -1,12 +1,11 @@
 <script lang="ts">
+	import { DynamicLucideIcon } from "$lib/components/dynamic-lucide-icon";
 	import { Button } from "$lib/components/shadcn-svelte/button";
-	import { DynamicLucideIcon } from "$lib/components/shadcn-svelte/dynamic-lucide-icon";
-	import ArrowDownIcon from "@lucide/svelte/icons/arrow-down";
-	import ArrowUpIcon from "@lucide/svelte/icons/arrow-up";
 	import ChevronDownIcon from "@lucide/svelte/icons/chevron-down";
 	import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
 	import FileTextIcon from "@lucide/svelte/icons/file-text";
 	import FolderIcon from "@lucide/svelte/icons/folder";
+	import LayersIcon from "@lucide/svelte/icons/layers";
 	import { untrack } from "svelte";
 	import { SvelteSet } from "svelte/reactivity";
 	import type { SectionDefinition } from "../types";
@@ -16,23 +15,17 @@
 		sections,
 		selectedSectionId,
 		selectedFormId,
-		depth = 0,
-		parentId = null,
+		virtualRootId,
 		onselect,
 		onselectform,
-		onmovesectionup,
-		onmovesectiondown,
 	}: {
 		sections: SectionDefinition[];
 		selectedSectionId: string | null;
 		selectedFormId: string | null;
-		depth?: number;
-		/** Parent section id when rendering a child list; null for root sections */
-		parentId?: string | null;
+		/** Optional id treated as the virtual root container; rendered with a different icon. */
+		virtualRootId?: string;
 		onselect: (id: string) => void;
 		onselectform: (sectionId: string, formId: string) => void;
-		onmovesectionup?: (args: { parentId: string | null; index: number }) => void;
-		onmovesectiondown?: (args: { parentId: string | null; index: number }) => void;
 	} = $props();
 
 	let expandedIds = new SvelteSet<string>(untrack(() => sections.map((s) => s.id)));
@@ -49,9 +42,10 @@
 		(s.children && s.children.length > 0) || (s.forms && s.forms.length > 0);
 </script>
 
-{#each sections as section, index (section.id)}
+{#each sections as section (section.id)}
 	{@const expanded = expandedIds.has(section.id)}
 	{@const isSelected = selectedSectionId === section.id && !selectedFormId}
+	{@const isVirtualRoot = virtualRootId !== undefined && section.id === virtualRootId}
 	<div>
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -59,7 +53,6 @@
 			class="flex cursor-pointer items-center gap-1 rounded-md px-1.5 py-1 text-sm transition-colors hover:bg-accent {isSelected
 				? 'bg-accent font-medium text-accent-foreground'
 				: 'text-muted-foreground'}"
-			style:padding-left="{depth * 12 + 4}px"
 			onclick={() => onselect(section.id)}
 		>
 			{#if hasChildren(section)}
@@ -82,77 +75,47 @@
 				<span class="inline-block size-5 shrink-0"></span>
 			{/if}
 
-			{#if section.icon}
+			{#if isVirtualRoot}
+				<LayersIcon class="size-3.5 shrink-0" />
+			{:else if section.icon}
 				<DynamicLucideIcon name={section.icon} class="size-3.5 shrink-0" />
 			{:else}
 				<FolderIcon class="size-3.5 shrink-0" />
 			{/if}
 
-			<span class="min-w-0 flex-1 truncate">{section.title}</span>
-			{#if onmovesectionup && onmovesectiondown}
-				<div class="flex shrink-0 items-center gap-0.5">
-					<Button
-						variant="ghost"
-						size="icon"
-						class="size-5 text-muted-foreground"
-						disabled={index === 0}
-						title="Move section up"
-						onclick={(e: MouseEvent) => {
-							e.stopPropagation();
-							onmovesectionup({ parentId, index });
-						}}
-					>
-						<ArrowUpIcon class="size-3" />
-					</Button>
-					<Button
-						variant="ghost"
-						size="icon"
-						class="size-5 text-muted-foreground"
-						disabled={index === sections.length - 1}
-						title="Move section down"
-						onclick={(e: MouseEvent) => {
-							e.stopPropagation();
-							onmovesectiondown({ parentId, index });
-						}}
-					>
-						<ArrowDownIcon class="size-3" />
-					</Button>
-				</div>
-			{/if}
+			<span class="min-w-0 flex-1 truncate {isVirtualRoot ? 'italic' : ''}">{section.title}</span>
 		</div>
 
-		{#if expanded}
-			{#if section.forms && section.forms.length > 0}
-				{#each section.forms as entry (entry.id)}
-					{@const isFormSelected = selectedFormId === entry.id}
-					<!-- svelte-ignore a11y_no_static_element_interactions -->
-					<!-- svelte-ignore a11y_click_events_have_key_events -->
-					<div
-						class="flex cursor-pointer items-center gap-1 rounded-md px-1.5 py-1 text-sm transition-colors hover:bg-accent {isFormSelected
-							? 'bg-accent font-medium text-accent-foreground'
-							: 'text-muted-foreground'}"
-						style:padding-left="{(depth + 1) * 12 + 24}px"
-						onclick={() => onselectform(section.id, entry.id)}
-					>
-						<FileTextIcon class="size-3.5 shrink-0" />
-						<span class="min-w-0 truncate">{entry.form.name}</span>
-					</div>
-				{/each}
-			{/if}
+		{#if expanded && (section.forms?.length || section.children?.length)}
+			<div class="ml-3 border-l border-border/60 pl-1.5">
+				{#if section.forms && section.forms.length > 0}
+					{#each section.forms as entry (entry.id)}
+						{@const isFormSelected = selectedFormId === entry.id}
+						<!-- svelte-ignore a11y_no_static_element_interactions -->
+						<!-- svelte-ignore a11y_click_events_have_key_events -->
+						<div
+							class="flex cursor-pointer items-center gap-1 rounded-md py-1 pr-1.5 pl-6 text-sm transition-colors hover:bg-accent {isFormSelected
+								? 'bg-accent font-medium text-accent-foreground'
+								: 'text-muted-foreground'}"
+							onclick={() => onselectform(section.id, entry.id)}
+						>
+							<FileTextIcon class="size-3.5 shrink-0" />
+							<span class="min-w-0 truncate">{entry.form.name}</span>
+						</div>
+					{/each}
+				{/if}
 
-			{#if section.children && section.children.length > 0}
-				<SectionTreeSelf
-					sections={section.children}
-					{selectedSectionId}
-					{selectedFormId}
-					depth={depth + 1}
-					parentId={section.id}
-					{onselect}
-					{onselectform}
-					{onmovesectionup}
-					{onmovesectiondown}
-				/>
-			{/if}
+				{#if section.children && section.children.length > 0}
+					<SectionTreeSelf
+						sections={section.children}
+						{selectedSectionId}
+						{selectedFormId}
+						{virtualRootId}
+						{onselect}
+						{onselectform}
+					/>
+				{/if}
+			</div>
 		{/if}
 	</div>
 {/each}

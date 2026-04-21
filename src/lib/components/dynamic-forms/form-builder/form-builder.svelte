@@ -22,19 +22,15 @@
 	import StepHeader from "./step-header.svelte";
 
 	let {
-		definition,
-		ondefinitionchange,
+		definition = $bindable(),
 	}: {
 		definition: FormDefinition;
-		ondefinitionchange?: (definition: FormDefinition) => void;
 	} = $props();
 
-	let multiStepMode = $state(untrack(() => isMultiStep(definition)));
-	let fields = $state<FormFieldDefinition[]>(untrack(() => (isMultiStep(definition) ? [] : [...definition.fields])));
-	let steps = $state<FormStepDefinition[]>(
-		untrack(() => (isMultiStep(definition) ? definition.steps!.map((s) => ({ ...s, fields: [...s.fields] })) : [])),
-	);
-	let formName = $state(untrack(() => definition.name));
+	const multiStepMode = $derived(isMultiStep(definition));
+	const fields = $derived(definition.fields);
+	const steps = $derived(definition.steps ?? []);
+
 	let selectedFieldId = $state<string | null>(null);
 	let selectedStepId = $state<string | null>(null);
 	let expandedSteps = new SvelteSet<string>(
@@ -55,33 +51,6 @@
 	});
 
 	const selectedStep = $derived(multiStepMode ? (steps.find((s) => s.id === selectedStepId) ?? null) : null);
-
-	let changeCounter = $state(0);
-
-	$effect(() => {
-		const _count = changeCounter;
-		const snapshot: FormDefinition = {
-			id: untrack(() => definition.id),
-			name: formName,
-			description: untrack(() => definition.description),
-			fields: multiStepMode ? steps.flatMap((s) => s.fields.map((f) => ({ ...f }))) : fields.map((f) => ({ ...f })),
-			steps: multiStepMode
-				? steps.map((s) => ({
-						id: s.id,
-						title: s.title,
-						description: s.description,
-						icon: s.icon,
-						fields: s.fields.map((f) => ({ ...f })),
-					}))
-				: undefined,
-		};
-		if (_count === 0) return;
-		untrack(() => ondefinitionchange?.(snapshot));
-	});
-
-	function notifyChange() {
-		changeCounter++;
-	}
 
 	function allFields(): FormFieldDefinition[] {
 		if (multiStepMode) {
@@ -105,77 +74,74 @@
 			...entry.defaults,
 		};
 
-		if (multiStepMode) {
+		if (multiStepMode && definition.steps) {
 			const targetStepId = selectedStepId ?? steps[steps.length - 1]?.id;
-			const stepIdx = steps.findIndex((s) => s.id === targetStepId);
+			const stepIdx = definition.steps.findIndex((s) => s.id === targetStepId);
 			if (stepIdx >= 0) {
-				steps[stepIdx].fields = [...steps[stepIdx].fields, newField];
-				expandedSteps.add(steps[stepIdx].id);
+				definition.steps[stepIdx].fields = [...definition.steps[stepIdx].fields, newField];
+				expandedSteps.add(definition.steps[stepIdx].id);
 			}
 		} else {
-			fields = [...fields, newField];
+			definition.fields = [...definition.fields, newField];
 		}
 		selectedFieldId = id;
 		selectedStepId = null;
-		notifyChange();
 	}
 
 	function removeField(id: string) {
-		if (multiStepMode) {
-			for (let i = 0; i < steps.length; i++) {
-				const idx = steps[i].fields.findIndex((f) => f.id === id);
+		if (multiStepMode && definition.steps) {
+			for (let i = 0; i < definition.steps.length; i++) {
+				const idx = definition.steps[i].fields.findIndex((f) => f.id === id);
 				if (idx >= 0) {
-					steps[i].fields = steps[i].fields.filter((f) => f.id !== id);
+					definition.steps[i].fields = definition.steps[i].fields.filter((f) => f.id !== id);
 					break;
 				}
 			}
 		} else {
-			fields = fields.filter((f) => f.id !== id);
+			definition.fields = definition.fields.filter((f) => f.id !== id);
 		}
 		if (selectedFieldId === id) selectedFieldId = null;
-		notifyChange();
 	}
 
 	function updateField(updated: FormFieldDefinition) {
-		if (multiStepMode) {
-			for (let i = 0; i < steps.length; i++) {
-				const idx = steps[i].fields.findIndex((f) => f.id === updated.id);
+		if (multiStepMode && definition.steps) {
+			for (let i = 0; i < definition.steps.length; i++) {
+				const idx = definition.steps[i].fields.findIndex((f) => f.id === updated.id);
 				if (idx >= 0) {
-					steps[i].fields = steps[i].fields.map((f) => (f.id === updated.id ? updated : f));
+					definition.steps[i].fields = definition.steps[i].fields.map((f) => (f.id === updated.id ? updated : f));
 					break;
 				}
 			}
 		} else {
-			fields = fields.map((f) => (f.id === updated.id ? updated : f));
+			definition.fields = definition.fields.map((f) => (f.id === updated.id ? updated : f));
 		}
-		notifyChange();
 	}
 
 	function updateStep(updated: FormStepDefinition) {
-		steps = steps.map((s) => (s.id === updated.id ? { ...updated, fields: s.fields } : s));
-		notifyChange();
+		if (!definition.steps) return;
+		definition.steps = definition.steps.map((s) => (s.id === updated.id ? { ...updated, fields: s.fields } : s));
 	}
 
 	// Flat mode DnD
 	function onconsider(e: CustomEvent<{ items: FormFieldDefinition[] }>) {
-		fields = e.detail.items;
+		definition.fields = e.detail.items;
 	}
 
 	function onfinalize(e: CustomEvent<{ items: FormFieldDefinition[] }>) {
-		fields = e.detail.items;
-		notifyChange();
+		definition.fields = e.detail.items;
 	}
 
 	// Multi-step DnD per step
 	function stepConsider(stepId: string, e: CustomEvent<{ items: FormFieldDefinition[] }>) {
-		const idx = steps.findIndex((s) => s.id === stepId);
-		if (idx >= 0) steps[idx].fields = e.detail.items;
+		if (!definition.steps) return;
+		const idx = definition.steps.findIndex((s) => s.id === stepId);
+		if (idx >= 0) definition.steps[idx].fields = e.detail.items;
 	}
 
 	function stepFinalize(stepId: string, e: CustomEvent<{ items: FormFieldDefinition[] }>) {
-		const idx = steps.findIndex((s) => s.id === stepId);
-		if (idx >= 0) steps[idx].fields = e.detail.items;
-		notifyChange();
+		if (!definition.steps) return;
+		const idx = definition.steps.findIndex((s) => s.id === stepId);
+		if (idx >= 0) definition.steps[idx].fields = e.detail.items;
 	}
 
 	// Step CRUD
@@ -187,33 +153,30 @@
 			title: `Step ${num}`,
 			fields: [],
 		};
-		steps = [...steps, newStep];
+		definition.steps = [...(definition.steps ?? []), newStep];
 		expandedSteps.add(id);
 		selectedStepId = id;
 		selectedFieldId = null;
-		notifyChange();
 	}
 
 	function removeStep(id: string) {
-		steps = steps.filter((s) => s.id !== id);
+		if (!definition.steps) return;
+		definition.steps = definition.steps.filter((s) => s.id !== id);
 		if (selectedStepId === id) selectedStepId = null;
-		notifyChange();
 	}
 
 	function moveStepUp(idx: number) {
-		if (idx <= 0) return;
-		const copy = [...steps];
+		if (!definition.steps || idx <= 0) return;
+		const copy = [...definition.steps];
 		[copy[idx - 1], copy[idx]] = [copy[idx], copy[idx - 1]];
-		steps = copy;
-		notifyChange();
+		definition.steps = copy;
 	}
 
 	function moveStepDown(idx: number) {
-		if (idx >= steps.length - 1) return;
-		const copy = [...steps];
+		if (!definition.steps || idx >= definition.steps.length - 1) return;
+		const copy = [...definition.steps];
 		[copy[idx], copy[idx + 1]] = [copy[idx + 1], copy[idx]];
-		steps = copy;
-		notifyChange();
+		definition.steps = copy;
 	}
 
 	function toggleStepExpanded(id: string) {
@@ -238,27 +201,25 @@
 	function toggleMultiStep(checked: boolean) {
 		if (checked && !multiStepMode) {
 			const id = crypto.randomUUID();
-			steps = [
+			definition.steps = [
 				{
 					id,
 					title: "Step 1",
-					fields: [...fields],
+					fields: [...definition.fields],
 				},
 			];
-			fields = [];
+			definition.fields = [];
 			expandedSteps.clear();
 			expandedSteps.add(id);
 			selectedFieldId = null;
 			selectedStepId = null;
-		} else if (!checked && multiStepMode) {
-			fields = steps.flatMap((s) => [...s.fields]);
-			steps = [];
+		} else if (!checked && multiStepMode && definition.steps) {
+			definition.fields = definition.steps.flatMap((s) => [...s.fields]);
+			definition.steps = undefined;
 			expandedSteps.clear();
 			selectedFieldId = null;
 			selectedStepId = null;
 		}
-		multiStepMode = checked;
-		notifyChange();
 	}
 </script>
 
@@ -285,9 +246,8 @@
 						<input
 							id="form-name-input"
 							class="min-w-0 flex-1 rounded-md border border-input bg-transparent px-2.5 py-1 text-sm font-semibold transition-colors outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary/30"
-							bind:value={formName}
+							bind:value={definition.name}
 							placeholder="Untitled Form"
-							oninput={notifyChange}
 						/>
 					</div>
 					<Field.Field orientation="horizontal" class="gap-2">

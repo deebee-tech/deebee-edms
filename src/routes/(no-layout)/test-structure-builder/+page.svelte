@@ -26,10 +26,6 @@
 	const hasSections = $derived(definition.sections.length > 0);
 	const hasAnswers = $derived(currentAnswers !== undefined && Object.keys(currentAnswers.formData).length > 0);
 
-	function handleDefinitionChange(updated: StructureDefinition) {
-		definition = updated;
-	}
-
 	function handleComplete(data: Record<string, Record<string, unknown>>) {
 		console.log("Structure completed!", data);
 	}
@@ -97,7 +93,7 @@
 
 		<Tabs.Content value="builder" class="mt-4">
 			<div class="h-[calc(100vh-220px)] min-h-[600px]">
-				<StructureBuilder {definition} ondefinitionchange={handleDefinitionChange} />
+				<StructureBuilder bind:definition />
 			</div>
 		</Tabs.Content>
 

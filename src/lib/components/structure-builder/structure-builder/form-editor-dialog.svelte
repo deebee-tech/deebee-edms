@@ -21,10 +21,6 @@
 
 	let working = $state<FormDefinition>(untrack(() => cloneDef(definition)));
 
-	function handleDefinitionChange(updated: FormDefinition) {
-		working = updated;
-	}
-
 	function handleSave() {
 		onsave(working);
 		open = false;
@@ -46,7 +42,7 @@
 
 		<div class="flex-1 overflow-hidden px-6">
 			<div class="h-full">
-				<FormBuilder definition={working} ondefinitionchange={handleDefinitionChange} />
+				<FormBuilder bind:definition={working} />
 			</div>
 		</div>
 

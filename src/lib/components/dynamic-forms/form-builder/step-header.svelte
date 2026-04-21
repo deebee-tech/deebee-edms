@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Badge } from "$lib/components/shadcn-svelte/badge";
 	import { Button } from "$lib/components/shadcn-svelte/button";
-	import { DynamicLucideIcon } from "$lib/components/shadcn-svelte/dynamic-lucide-icon";
+	import { DynamicLucideIcon } from "$lib/components/dynamic-lucide-icon";
 	import ArrowDownIcon from "@lucide/svelte/icons/arrow-down";
 	import ArrowUpIcon from "@lucide/svelte/icons/arrow-up";
 	import ChevronDownIcon from "@lucide/svelte/icons/chevron-down";

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { buttonVariants } from "$lib/components/shadcn-svelte/button";
 	import * as DropdownMenu from "$lib/components/shadcn-svelte/dropdown-menu";
-	import { Flag } from "$lib/components/shadcn-svelte/flag";
+	import { Flag } from "$lib/components/flag";
 	import { getDefaultLanguages } from "$lib/components/shadcn-svelte/language-switcher/defaults";
 	import type { LanguageSwitcherProps } from "$lib/components/shadcn-svelte/language-switcher/types";
 	import { getLocale, isLocale, setLocale } from "$lib/paraglide/runtime";

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getFlag } from "$lib/components/shadcn-svelte/flag/flags";
+	import { getFlag } from "./flags";
 
 	interface Props {
 		countryCode?: string | null;

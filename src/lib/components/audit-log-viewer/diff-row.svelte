@@ -29,9 +29,7 @@
 		if (diff.left !== undefined) return "left";
 		return undefined;
 	});
-	const mergedValue = $derived(
-		mergedSource === "left" ? diff.left : mergedSource === "right" ? diff.right : undefined,
-	);
+	const mergedValue = $derived(mergedSource === "left" ? diff.left : mergedSource === "right" ? diff.right : undefined);
 	const mergedIsExplicit = $derived(selection !== undefined);
 
 	const statusClasses: Record<FieldDiff["status"], string> = {
@@ -98,7 +96,9 @@
 >
 	<div
 		class="flex items-center border-r px-2.5 py-1.5"
-		title={isUnchanged ? `${diff.field} (${statusLabels[diff.status]})` : `${diff.field} — ${statusLabels[diff.status]}`}
+		title={isUnchanged
+			? `${diff.field} (${statusLabels[diff.status]})`
+			: `${diff.field} — ${statusLabels[diff.status]}`}
 	>
 		<span class="truncate font-mono text-xs font-medium">{diff.field}</span>
 	</div>
@@ -146,10 +146,7 @@
 			{/if}
 		</span>
 
-		<span
-			class={["min-w-0 flex-1 truncate font-mono text-xs", cellClasses(side)]}
-			title={formatValue(valueOf(side))}
-		>
+		<span class={["min-w-0 flex-1 truncate font-mono text-xs", cellClasses(side)]} title={formatValue(valueOf(side))}>
 			{missing ? "(absent)" : formatValue(valueOf(side))}
 		</span>
 	</div>
@@ -163,10 +160,7 @@
 			<span class="font-mono text-xs text-muted-foreground/60 italic">(omitted)</span>
 		{:else if isUnchanged}
 			<EqualIcon class="size-3 shrink-0 text-muted-foreground/40" aria-hidden="true" />
-			<span
-				class="min-w-0 flex-1 truncate font-mono text-xs text-foreground/80"
-				title={formatValue(mergedValue)}
-			>
+			<span class="min-w-0 flex-1 truncate font-mono text-xs text-foreground/80" title={formatValue(mergedValue)}>
 				{formatValue(mergedValue)}
 			</span>
 		{:else}
@@ -181,12 +175,8 @@
 							? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
 							: "text-emerald-700/60 dark:text-emerald-400/60",
 				]}
-				title={mergedIsExplicit
-					? `Picked from ${mergedSource} side`
-					: `Default — taking the ${mergedSource} value`}
-				aria-label={mergedIsExplicit
-					? `Picked from ${mergedSource} side`
-					: `Default from ${mergedSource} side`}
+				title={mergedIsExplicit ? `Picked from ${mergedSource} side` : `Default — taking the ${mergedSource} value`}
+				aria-label={mergedIsExplicit ? `Picked from ${mergedSource} side` : `Default from ${mergedSource} side`}
 			>
 				{#if mergedSource === "left"}
 					<ArrowLeftIcon class="size-2.5" />
@@ -197,9 +187,7 @@
 			<span
 				class={[
 					"min-w-0 flex-1 truncate font-mono text-xs",
-					mergedSource === "left"
-						? "text-rose-700 dark:text-rose-300"
-						: "text-emerald-700 dark:text-emerald-300",
+					mergedSource === "left" ? "text-rose-700 dark:text-rose-300" : "text-emerald-700 dark:text-emerald-300",
 					mergedIsExplicit ? "font-medium" : "opacity-90",
 				]}
 				title={formatValue(mergedValue)}

@@ -17,10 +17,6 @@
 
 	const definitionJson = $derived(JSON.stringify(definition, null, 2));
 
-	function handleDefinitionChange(updated: WorkflowDefinition) {
-		definition = updated;
-	}
-
 	function loadDefinitionFromJson() {
 		importError = "";
 		try {
@@ -59,7 +55,7 @@
 
 		<Tabs.Content value="builder" class="mt-4">
 			<div class="h-[calc(100vh-220px)] min-h-[600px]">
-				<WorkflowBuilder {definition} ondefinitionchange={handleDefinitionChange} />
+				<WorkflowBuilder bind:definition />
 			</div>
 		</Tabs.Content>
 

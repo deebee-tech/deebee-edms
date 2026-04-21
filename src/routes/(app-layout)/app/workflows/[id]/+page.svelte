@@ -13,23 +13,21 @@
 	// svelte-ignore state_referenced_locally
 	let definition = $state<WorkflowDefinition>(data.workflow.definition);
 	let definitionJson = $derived(JSON.stringify(definition, null, 2));
-	let hasUnsavedChanges = $state(false);
 	let formEl: HTMLFormElement | undefined = $state();
 
 	let lastSyncedWorkflowId: string | null = null;
+	// svelte-ignore state_referenced_locally
+	let savedJson = $state<string>(JSON.stringify(data.workflow.definition, null, 2));
+
+	const hasUnsavedChanges = $derived(definitionJson !== savedJson);
 
 	$effect.pre(() => {
 		const id = data.workflow.id;
 		if (lastSyncedWorkflowId === id) return;
 		lastSyncedWorkflowId = id;
 		definition = data.workflow.definition;
-		hasUnsavedChanges = false;
+		savedJson = JSON.stringify(data.workflow.definition, null, 2);
 	});
-
-	function handleDefinitionChange(updated: WorkflowDefinition) {
-		definition = updated;
-		hasUnsavedChanges = true;
-	}
 
 	function handleSave() {
 		formEl?.requestSubmit();
@@ -58,7 +56,7 @@
 			use:enhance={() => {
 				return async ({ result }) => {
 					if (result.type === "success") {
-						hasUnsavedChanges = false;
+						savedJson = definitionJson;
 					}
 				};
 			}}
@@ -72,6 +70,6 @@
 	</header>
 
 	<div class="flex-1 overflow-hidden">
-		<WorkflowBuilder {definition} ondefinitionchange={handleDefinitionChange} />
+		<WorkflowBuilder bind:definition />
 	</div>
 </div>

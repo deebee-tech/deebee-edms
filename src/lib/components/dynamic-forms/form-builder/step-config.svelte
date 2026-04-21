@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button } from "$lib/components/shadcn-svelte/button";
-	import { DynamicLucideIcon } from "$lib/components/shadcn-svelte/dynamic-lucide-icon";
+	import { DynamicLucideIcon } from "$lib/components/dynamic-lucide-icon";
 	import * as Field from "$lib/components/shadcn-svelte/field";
 	import { Input } from "$lib/components/shadcn-svelte/input";
 	import { Separator } from "$lib/components/shadcn-svelte/separator";

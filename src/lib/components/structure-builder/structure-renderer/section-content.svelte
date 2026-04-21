@@ -2,7 +2,7 @@
 	import { createDefaultValues, createValibotSchema, FormRenderer } from "$lib/components/dynamic-forms";
 	import { Button } from "$lib/components/shadcn-svelte/button";
 	import * as Card from "$lib/components/shadcn-svelte/card";
-	import { DynamicLucideIcon } from "$lib/components/shadcn-svelte/dynamic-lucide-icon";
+	import { DynamicLucideIcon } from "$lib/components/dynamic-lucide-icon";
 	import CheckCircleIcon from "@lucide/svelte/icons/check-circle";
 	import ChevronLeftIcon from "@lucide/svelte/icons/chevron-left";
 	import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";

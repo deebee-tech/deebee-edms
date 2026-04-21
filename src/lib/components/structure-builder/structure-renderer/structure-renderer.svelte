@@ -19,8 +19,14 @@
 		onanswerschange?: (answers: StructureAnswers) => void;
 	} = $props();
 
-	const structureState = untrack(() => new StructureState(definition, answers));
+	const structureState = untrack(() => new StructureState(() => definition, answers));
 	setStructureState(structureState);
+
+	$effect(() => {
+		// Track sections so this re-runs when the live definition changes shape.
+		void definition.sections;
+		structureState.reconcileActiveSection();
+	});
 
 	$effect(() => {
 		const snapshot = structureState.toAnswers();

@@ -94,6 +94,7 @@
 		"ondelete",
 		"ondeletechild",
 		"ondeleteform",
+		"ondeletesection",
 		"ondoubleclick",
 		"onedgeclick",
 		"onedgeschange",

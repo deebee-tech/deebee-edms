@@ -8,7 +8,7 @@
 	import ConditionEditor from "./condition-editor.svelte";
 
 	let {
-		section = $bindable(),
+		section,
 		allSectionIds = [],
 		allStateKeys = [],
 	}: {
@@ -57,7 +57,15 @@
 
 	<Field.Field>
 		<Field.Label class="text-xs">Description</Field.Label>
-		<Textarea class="min-h-[60px] text-sm" bind:value={section.description} placeholder="Optional description" />
+		<Textarea
+			class="min-h-[60px] text-sm"
+			value={section.description ?? ""}
+			placeholder="Optional description"
+			oninput={(e) => {
+				const v = e.currentTarget.value;
+				section.description = v.trim() === "" ? null : v;
+			}}
+		/>
 	</Field.Field>
 
 	<Field.Field>

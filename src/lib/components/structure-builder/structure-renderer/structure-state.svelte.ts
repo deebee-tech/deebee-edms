@@ -17,15 +17,20 @@ export interface NavigableItem {
 }
 
 export class StructureState {
-	definition: StructureDefinition;
+	#getDefinition: () => StructureDefinition;
 	sectionStatus = $state<Record<string, SectionStatus>>({});
 	formData = $state<Record<string, Record<string, unknown>>>({});
 	activeSectionId = $state<string>("");
 	activeFormIndex = $state(0);
 	completed = $state(false);
 
-	constructor(definition: StructureDefinition, answers?: StructureAnswers) {
-		this.definition = definition;
+	get definition(): StructureDefinition {
+		return this.#getDefinition();
+	}
+
+	constructor(getDefinition: () => StructureDefinition, answers?: StructureAnswers) {
+		this.#getDefinition = getDefinition;
+		const definition = getDefinition();
 
 		if (answers) {
 			this.formData = { ...answers.formData };
@@ -79,6 +84,37 @@ export class StructureState {
 		}
 	}
 
+	/**
+	 * Re-anchors `activeSectionId` / `activeFormIndex` after the underlying definition changes
+	 * (sections added, removed, or hidden by visibility rules in live editing). If the current
+	 * active section is gone or no longer navigable, snap to the first navigable item; if its
+	 * `activeFormIndex` is out of range, reset it.
+	 */
+	reconcileActiveSection() {
+		const items = this.getNavigableItems();
+		if (items.length === 0) {
+			this.activeSectionId = "";
+			this.activeFormIndex = 0;
+			return;
+		}
+
+		const stillValid = items.some(
+			(item) =>
+				item.sectionId === this.activeSectionId && (item.formIndex === this.activeFormIndex || item.formIndex < 0),
+		);
+		if (stillValid) return;
+
+		const sameSection = items.find((item) => item.sectionId === this.activeSectionId);
+		if (sameSection) {
+			this.activeFormIndex = sameSection.formIndex >= 0 ? sameSection.formIndex : 0;
+			return;
+		}
+
+		const first = items[0];
+		this.activeSectionId = first.sectionId;
+		this.activeFormIndex = first.formIndex >= 0 ? first.formIndex : 0;
+	}
+
 	toAnswers(): StructureAnswers {
 		return {
 			structureId: this.definition.id,
@@ -94,6 +130,45 @@ export class StructureState {
 
 	isSectionVisibleCheck(section: SectionDefinition): boolean {
 		return isSectionVisible(section, this.formData);
+	}
+
+	/**
+	 * Returns a display status that, for parent sections, reflects the aggregate
+	 * progress of their visible children rather than the parent's own stored status.
+	 *
+	 * Aggregation rules (children only — own forms are handled by `checkParentCompletion`):
+	 *  - all visible children completed/skipped → "completed"
+	 *  - any visible child in_progress (or partially completed) → "in_progress"
+	 *  - all visible children blocked → "blocked"
+	 *  - otherwise → fall back to the section's own stored status
+	 *
+	 * Leaf sections (no children) return their own stored status.
+	 */
+	getEffectiveStatus(section: SectionDefinition): SectionStatus {
+		const ownStatus = this.sectionStatus[section.id] ?? "pending";
+
+		if (!section.children || section.children.length === 0) {
+			return ownStatus;
+		}
+
+		const visibleChildren = section.children.filter((c) => this.isSectionVisibleCheck(c));
+		if (visibleChildren.length === 0) {
+			return ownStatus;
+		}
+
+		const childStatuses = visibleChildren.map((c) => this.getEffectiveStatus(c));
+
+		if (childStatuses.every((s) => s === "completed" || s === "skipped")) {
+			return "completed";
+		}
+		if (childStatuses.some((s) => s === "in_progress" || s === "completed")) {
+			return "in_progress";
+		}
+		if (childStatuses.every((s) => s === "blocked")) {
+			return "blocked";
+		}
+
+		return ownStatus;
 	}
 
 	isSectionBlockedCheck(section: SectionDefinition): boolean {

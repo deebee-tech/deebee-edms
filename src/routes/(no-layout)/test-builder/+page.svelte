@@ -40,11 +40,6 @@
 		}
 	});
 
-	function handleDefinitionChange(updated: FormDefinition) {
-		definition = updated;
-		previewKey++;
-	}
-
 	function loadDefinitionFromJson() {
 		importError = "";
 		try {
@@ -77,7 +72,7 @@
 		</Tabs.List>
 
 		<Tabs.Content value="builder" class="mt-4">
-			<FormBuilder {definition} ondefinitionchange={handleDefinitionChange} />
+			<FormBuilder bind:definition />
 		</Tabs.Content>
 
 		<Tabs.Content value="preview" class="mt-4">

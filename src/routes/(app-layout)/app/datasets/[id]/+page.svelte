@@ -14,23 +14,21 @@
 	// svelte-ignore state_referenced_locally
 	let definition = $state<DatasetDefinition>(data.dataset.definition);
 	let definitionJson = $derived(JSON.stringify(definition, null, 2));
-	let hasUnsavedChanges = $state(false);
 	let formEl: HTMLFormElement | undefined = $state();
 
 	let lastSyncedDatasetId: string | null = null;
+	// svelte-ignore state_referenced_locally
+	let savedJson = $state<string>(JSON.stringify(data.dataset.definition, null, 2));
+
+	const hasUnsavedChanges = $derived(definitionJson !== savedJson);
 
 	$effect.pre(() => {
 		const id = data.dataset.id;
 		if (lastSyncedDatasetId === id) return;
 		lastSyncedDatasetId = id;
 		definition = data.dataset.definition;
-		hasUnsavedChanges = false;
+		savedJson = JSON.stringify(data.dataset.definition, null, 2);
 	});
-
-	function handleDefinitionChange(updated: DatasetDefinition) {
-		definition = updated;
-		hasUnsavedChanges = true;
-	}
 
 	function handleSave() {
 		formEl?.requestSubmit();
@@ -61,7 +59,7 @@
 				use:enhance={() => {
 					return async ({ result }) => {
 						if (result.type === "success") {
-							hasUnsavedChanges = false;
+							savedJson = definitionJson;
 						}
 					};
 				}}
@@ -76,6 +74,6 @@
 	</header>
 
 	<div class="flex-1 overflow-hidden">
-		<DatasetBuilder {definition} schema={data.schema.tables} ondefinitionchange={handleDefinitionChange} />
+		<DatasetBuilder bind:definition schema={data.schema.tables} />
 	</div>
 </div>

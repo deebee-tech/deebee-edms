@@ -71,7 +71,9 @@
 						title={actionLabels[selectedEntry.action]}
 					></span>
 					<span class="truncate text-sm">
-						<span class="font-medium tabular-nums">{shortDate(selectedEntry.changedAt)} · {timeLabel(selectedEntry.changedAt)}</span>
+						<span class="font-medium tabular-nums"
+							>{shortDate(selectedEntry.changedAt)} · {timeLabel(selectedEntry.changedAt)}</span
+						>
 						<span class="text-muted-foreground"> · {selectedEntry.changedBy.name}</span>
 					</span>
 				</span>

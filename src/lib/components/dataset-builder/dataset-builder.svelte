@@ -13,29 +13,24 @@
 	import PanelLeftCloseIcon from "@lucide/svelte/icons/panel-left-close";
 	import PanelLeftOpenIcon from "@lucide/svelte/icons/panel-left-open";
 	import { SvelteFlowProvider, type Connection, type Edge, type Node } from "@xyflow/svelte";
-	import { untrack } from "svelte";
 	import DatasetCanvas from "./dataset-canvas.svelte";
 	import FieldGrid from "./field-grid.svelte";
 	import { setJoinMenuContext } from "./join-menu-store.svelte.js";
 	import SchemaBrowser from "./schema-browser.svelte";
-	import type { DatasetDefinition, DatasetField, DatasetJoin, DatasetTable, JoinType, SchemaTable } from "./types";
+	import type { DatasetDefinition, DatasetField, DatasetTable, JoinType, SchemaTable } from "./types";
 
 	let {
-		definition,
+		definition = $bindable(),
 		schema,
-		ondefinitionchange,
 	}: {
 		definition: DatasetDefinition;
 		schema: SchemaTable[];
-		ondefinitionchange?: (definition: DatasetDefinition) => void;
 	} = $props();
 
-	let datasetTables = $state.raw<DatasetTable[]>(untrack(() => [...definition.tables]));
-	let datasetJoins = $state.raw<DatasetJoin[]>(untrack(() => [...definition.joins]));
-	let datasetFields = $state.raw<DatasetField[]>(untrack(() => [...definition.fields]));
-	let datasetFilters = $state<FilterGroup[]>(untrack(() => JSON.parse(JSON.stringify(definition.filters))));
-
-	let changeCounter = $state(0);
+	const datasetTables = $derived(definition.tables);
+	const datasetJoins = $derived(definition.joins);
+	const datasetFields = $derived(definition.fields);
+	const datasetFilters = $derived(definition.filters);
 
 	function inferColumnType(dataType: string): ColumnType {
 		const dt = dataType.toLowerCase();
@@ -130,34 +125,12 @@
 		joinMenu = null;
 	}
 
-	$effect(() => {
-		const _count = changeCounter;
-		const snapshot: DatasetDefinition = {
-			id: untrack(() => definition.id),
-			name: untrack(() => definition.name),
-			description: untrack(() => definition.description),
-			version: untrack(() => definition.version),
-			tables: datasetTables.map((t) => ({ ...t, position: { ...t.position } })),
-			joins: datasetJoins.map((j) => ({ ...j })),
-			fields: datasetFields.map((f) => ({ ...f })),
-			filters: JSON.parse(JSON.stringify(datasetFilters)),
-			sort: untrack(() => [...definition.sort]),
-		};
-		if (_count === 0) return;
-		untrack(() => ondefinitionchange?.(snapshot));
-	});
-
-	function notifyChange() {
-		changeCounter++;
-	}
-
 	function handleJoinTypeChange(edgeId: string, newType: string) {
-		datasetJoins = datasetJoins.map((j) => (j.id === edgeId ? { ...j, joinType: newType as JoinType } : j));
-		notifyChange();
+		definition.joins = definition.joins.map((j) => (j.id === edgeId ? { ...j, joinType: newType as JoinType } : j));
 	}
 
 	function handleDropTable(tableData: { schema: string; name: string }, position: { x: number; y: number }) {
-		const existingCount = datasetTables.filter((t) => t.tableName === tableData.name).length;
+		const existingCount = definition.tables.filter((t) => t.tableName === tableData.name).length;
 		const alias = existingCount > 0 ? `${tableData.name}_${existingCount + 1}` : tableData.name;
 
 		const newTable: DatasetTable = {
@@ -168,10 +141,9 @@
 			position,
 		};
 
-		datasetTables = [...datasetTables, newTable];
+		definition.tables = [...definition.tables, newTable];
 
 		autoDetectJoins(newTable);
-		notifyChange();
 	}
 
 	function autoDetectJoins(newTable: DatasetTable) {
@@ -179,7 +151,7 @@
 		if (!schemaTable) return;
 
 		for (const fk of schemaTable.foreignKeys) {
-			const targetTable = datasetTables.find(
+			const targetTable = definition.tables.find(
 				(t) =>
 					t.id !== newTable.id &&
 					t.tableName === fk.referencedTable &&
@@ -187,9 +159,9 @@
 			);
 			if (targetTable) {
 				const joinId = `j-${newTable.id}-${targetTable.id}-${fk.columnName}`;
-				if (!datasetJoins.some((j) => j.id === joinId)) {
-					datasetJoins = [
-						...datasetJoins,
+				if (!definition.joins.some((j) => j.id === joinId)) {
+					definition.joins = [
+						...definition.joins,
 						{
 							id: joinId,
 							sourceTableId: newTable.id,
@@ -203,7 +175,7 @@
 			}
 		}
 
-		for (const existing of datasetTables) {
+		for (const existing of definition.tables) {
 			if (existing.id === newTable.id) continue;
 			const existingSchema = getSchemaTable(existing.tableName, existing.schema);
 			if (!existingSchema) continue;
@@ -214,9 +186,9 @@
 					(!fk.referencedSchema || fk.referencedSchema === newTable.schema)
 				) {
 					const joinId = `j-${existing.id}-${newTable.id}-${fk.columnName}`;
-					if (!datasetJoins.some((j) => j.id === joinId)) {
-						datasetJoins = [
-							...datasetJoins,
+					if (!definition.joins.some((j) => j.id === joinId)) {
+						definition.joins = [
+							...definition.joins,
 							{
 								id: joinId,
 								sourceTableId: existing.id,
@@ -241,10 +213,10 @@
 		if (!sourceCol || !targetCol) return;
 
 		const joinId = `j-${connection.source}-${connection.target}-${sourceCol}`;
-		if (datasetJoins.some((j) => j.id === joinId)) return;
+		if (definition.joins.some((j) => j.id === joinId)) return;
 
-		datasetJoins = [
-			...datasetJoins,
+		definition.joins = [
+			...definition.joins,
 			{
 				id: joinId,
 				sourceTableId: connection.source,
@@ -254,15 +226,14 @@
 				joinType: "inner" as JoinType,
 			},
 		];
-		notifyChange();
 	}
 
 	function handleAddFieldFromCanvas(tableId: string, columnName: string) {
-		const alreadyExists = datasetFields.some((f) => f.tableId === tableId && f.columnName === columnName);
+		const alreadyExists = definition.fields.some((f) => f.tableId === tableId && f.columnName === columnName);
 		if (alreadyExists) return;
 
-		datasetFields = [
-			...datasetFields,
+		definition.fields = [
+			...definition.fields,
 			{
 				id: crypto.randomUUID(),
 				tableId,
@@ -270,28 +241,24 @@
 				visible: true,
 			},
 		];
-		notifyChange();
 	}
 
 	function handleAddFieldFromBrowser(tableName: string, tableSchema: string, columnName: string) {
-		const table = datasetTables.find((t) => t.tableName === tableName && t.schema === tableSchema);
+		const table = definition.tables.find((t) => t.tableName === tableName && t.schema === tableSchema);
 		if (!table) return;
 		handleAddFieldFromCanvas(table.id, columnName);
 	}
 
 	function handleFieldsChange(updated: DatasetField[]) {
-		datasetFields = updated;
-		notifyChange();
+		definition.fields = updated;
 	}
 
 	function handleFilterBuilderApply(groups: FilterGroup[]) {
-		datasetFilters = groups;
-		notifyChange();
+		definition.filters = groups;
 	}
 
 	function handleNodeDragStop(nodeId: string, position: { x: number; y: number }) {
-		datasetTables = datasetTables.map((t) => (t.id === nodeId ? { ...t, position } : t));
-		notifyChange();
+		definition.tables = definition.tables.map((t) => (t.id === nodeId ? { ...t, position } : t));
 	}
 </script>
 

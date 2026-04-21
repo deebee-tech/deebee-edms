@@ -23,10 +23,6 @@
 	const generatedSql = $derived(generateSql(definition));
 	const formattedGeneratedSql = $derived(formatDisplaySql(generatedSql.sql, definition.engine ?? "postgres"));
 
-	function handleDefinitionChange(updated: DatasetDefinition) {
-		definition = updated;
-	}
-
 	function loadDefinitionFromJson() {
 		importError = "";
 		try {
@@ -71,7 +67,7 @@
 
 		<Tabs.Content value="builder" class="mt-4">
 			<div class="h-[calc(100vh-220px)] min-h-[600px]">
-				<DatasetBuilder {definition} schema={sampleSchema} ondefinitionchange={handleDefinitionChange} />
+				<DatasetBuilder bind:definition schema={sampleSchema} />
 			</div>
 		</Tabs.Content>
 

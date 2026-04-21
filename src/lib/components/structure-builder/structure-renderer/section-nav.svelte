@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DynamicLucideIcon } from "$lib/components/shadcn-svelte/dynamic-lucide-icon";
+	import { DynamicLucideIcon } from "$lib/components/dynamic-lucide-icon";
 	import CheckCircleIcon from "@lucide/svelte/icons/check-circle";
 	import CircleDotIcon from "@lucide/svelte/icons/circle-dot";
 	import CircleIcon from "@lucide/svelte/icons/circle";
@@ -14,6 +14,7 @@
 		depth = 0,
 	}: {
 		sections: SectionDefinition[];
+		/** Nesting depth — controls whether to wrap children in an indent guide. */
 		depth?: number;
 	} = $props();
 
@@ -52,7 +53,7 @@
 
 {#each sections as section (section.id)}
 	{#if structureState.isSectionVisibleCheck(section)}
-		{@const status = structureState.sectionStatus[section.id] ?? "pending"}
+		{@const status = structureState.getEffectiveStatus(section)}
 		{@const isActive = structureState.activeSectionId === section.id}
 		{@const isBlocked = status === "blocked" || structureState.isSectionBlockedCheck(section)}
 		{@const StatusIcon = statusIcon(status)}
@@ -65,16 +66,15 @@
 				: isBlocked
 					? 'cursor-not-allowed opacity-50'
 					: 'cursor-pointer hover:bg-accent/50'}"
-			style:padding-left="{depth * 16 + 8}px"
 			onclick={() => {
 				if (!isBlocked) structureState.navigateTo(section.id);
 			}}
 		>
-			<StatusIcon class="size-4 shrink-0 {statusColor(status)}" />
-
-			{#if section.icon}
-				<DynamicLucideIcon name={section.icon} class="size-3.5 shrink-0 text-muted-foreground" />
-			{/if}
+			<DynamicLucideIcon name={section.icon} class="size-4 shrink-0 {statusColor(status)}">
+				{#snippet fallback()}
+					<StatusIcon class="size-4 shrink-0 {statusColor(status)}" />
+				{/snippet}
+			</DynamicLucideIcon>
 
 			<span class="min-w-0 truncate">{section.title}</span>
 
@@ -84,7 +84,9 @@
 		</div>
 
 		{#if section.children && section.children.length > 0}
-			<SectionNavSelf sections={section.children} depth={depth + 1} />
+			<div class="ml-3 border-l border-border/60 pl-1.5">
+				<SectionNavSelf sections={section.children} depth={depth + 1} />
+			</div>
 		{/if}
 	{/if}
 {/each}

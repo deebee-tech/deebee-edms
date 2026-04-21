@@ -60,10 +60,6 @@
 		return m;
 	});
 
-	function handleDefinitionChange(updated: AudienceDefinition) {
-		definition = updated;
-	}
-
 	function loadDefinitionFromJson() {
 		importError = "";
 		try {
@@ -167,11 +163,10 @@
 		<Tabs.Content value="builder" class="mt-4">
 			<div class="h-[calc(100vh-220px)] min-h-[600px]">
 				<AudienceBuilder
-					{definition}
+					bind:definition
 					catalog={sampleCatalog}
 					matchedCount={summary.matchedCount}
 					totalCount={summary.totalPopulation}
-					ondefinitionchange={handleDefinitionChange}
 				/>
 			</div>
 		</Tabs.Content>

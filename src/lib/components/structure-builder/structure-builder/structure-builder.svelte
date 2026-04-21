@@ -2,11 +2,10 @@
 	import FullscreenContainer from "$lib/components/fullscreen-container.svelte";
 	import { Button } from "$lib/components/shadcn-svelte/button";
 	import { ScrollArea } from "$lib/components/shadcn-svelte/scroll-area";
-	import FolderPlusIcon from "@lucide/svelte/icons/folder-plus";
+	import LayersIcon from "@lucide/svelte/icons/layers";
 	import LayoutListIcon from "@lucide/svelte/icons/layout-list";
 	import MaximizeIcon from "@lucide/svelte/icons/maximize";
 	import MinimizeIcon from "@lucide/svelte/icons/minimize";
-	import { untrack } from "svelte";
 	import { collectAllSectionIds, collectAllStateKeys, findSectionById } from "../conditions";
 	import type { SectionDefinition, SectionFormEntry, StructureDefinition } from "../types";
 	import FormEditorDialog from "./form-editor-dialog.svelte";
@@ -15,53 +14,44 @@
 	import SectionConfig from "./section-config.svelte";
 	import SectionTree from "./section-tree.svelte";
 
+	const VIRTUAL_ROOT_ID = "__structure_virtual_root__";
+
 	let {
-		definition,
-		ondefinitionchange,
+		definition = $bindable(),
 	}: {
 		definition: StructureDefinition;
-		ondefinitionchange?: (definition: StructureDefinition) => void;
 	} = $props();
 
-	let sections = $state<SectionDefinition[]>(untrack(() => JSON.parse(JSON.stringify(definition.sections))));
-	let structureName = $state(untrack(() => definition.name));
-	let selectedSectionId = $state<string | null>(null);
+	let selectedSectionId = $state<string | null>(VIRTUAL_ROOT_ID);
 	let selectedFormId = $state<string | null>(null);
 	let editingFormEntry = $state<SectionFormEntry | null>(null);
 	let formEditorOpen = $state(false);
 
-	let changeCounter = $state(0);
+	const allSectionIds = $derived(collectAllSectionIds(definition.sections));
+	const allStateKeys = $derived(collectAllStateKeys(definition.sections));
 
-	const allSectionIds = $derived(collectAllSectionIds(sections));
-	const allStateKeys = $derived(collectAllStateKeys(sections));
+	const virtualRoot: SectionDefinition = $derived({
+		id: VIRTUAL_ROOT_ID,
+		title: definition.name?.trim() ? definition.name : "Structure",
+		children: definition.sections,
+	});
+
+	const treeSections = $derived([virtualRoot]);
 
 	const selectedSection = $derived.by(() => {
 		if (!selectedSectionId) return null;
-		return findSectionById(sections, selectedSectionId);
+		if (selectedSectionId === VIRTUAL_ROOT_ID) return virtualRoot;
+		return findSectionById(definition.sections, selectedSectionId);
 	});
 
+	const isVirtualRootSelected = $derived(selectedSectionId === VIRTUAL_ROOT_ID);
+
 	const selectedFormEntry = $derived.by((): SectionFormEntry | null => {
-		if (!selectedFormId || !selectedSectionId) return null;
-		const section = findSectionById(sections, selectedSectionId);
+		if (!selectedFormId || !selectedSectionId || selectedSectionId === VIRTUAL_ROOT_ID) return null;
+		const section = findSectionById(definition.sections, selectedSectionId);
 		if (!section?.forms) return null;
 		return section.forms.find((f) => f.id === selectedFormId) ?? null;
 	});
-
-	$effect(() => {
-		const _count = changeCounter;
-		const snapshot: StructureDefinition = {
-			id: untrack(() => definition.id),
-			name: structureName,
-			description: untrack(() => definition.description),
-			sections: JSON.parse(JSON.stringify(sections)),
-		};
-		if (_count === 0) return;
-		untrack(() => ondefinitionchange?.(snapshot));
-	});
-
-	function notifyChange() {
-		changeCounter++;
-	}
 
 	function selectSection(id: string) {
 		selectedSectionId = id;
@@ -75,19 +65,22 @@
 
 	function addRootSection() {
 		const id = crypto.randomUUID();
-		const num = sections.length + 1;
+		const num = definition.sections.length + 1;
 		const newSection: SectionDefinition = {
 			id,
 			title: `Section ${num}`,
 		};
-		sections = [...sections, newSection];
+		definition.sections = [...definition.sections, newSection];
 		selectedSectionId = id;
 		selectedFormId = null;
-		notifyChange();
 	}
 
 	function addChildSection(parentId: string) {
-		const parent = findSectionById(sections, parentId);
+		if (parentId === VIRTUAL_ROOT_ID) {
+			addRootSection();
+			return;
+		}
+		const parent = findSectionById(definition.sections, parentId);
 		if (!parent) return;
 		const id = crypto.randomUUID();
 		const num = (parent.children?.length ?? 0) + 1;
@@ -95,15 +88,13 @@
 			id,
 			title: `${parent.title} — Child ${num}`,
 		};
-		if (!parent.children) parent.children = [];
-		parent.children = [...parent.children, newChild];
-		sections = [...sections];
+		parent.children = [...(parent.children ?? []), newChild];
 		selectedSectionId = id;
 		selectedFormId = null;
-		notifyChange();
 	}
 
 	function deleteSection(id: string) {
+		if (id === VIRTUAL_ROOT_ID) return;
 		function removeFrom(list: SectionDefinition[]): SectionDefinition[] {
 			return list
 				.filter((s) => s.id !== id)
@@ -112,62 +103,54 @@
 					children: s.children ? removeFrom(s.children) : undefined,
 				}));
 		}
-		sections = removeFrom(sections);
+		definition.sections = removeFrom(definition.sections);
 		if (selectedSectionId === id) {
-			selectedSectionId = null;
+			selectedSectionId = VIRTUAL_ROOT_ID;
 			selectedFormId = null;
 		}
-		notifyChange();
 	}
 
 	function moveChildUp(parentId: string, index: number) {
-		const parent = findSectionById(sections, parentId);
+		if (parentId === VIRTUAL_ROOT_ID) {
+			moveRootSectionUp(index);
+			return;
+		}
+		const parent = findSectionById(definition.sections, parentId);
 		if (!parent?.children || index <= 0) return;
 		const copy = [...parent.children];
 		[copy[index - 1], copy[index]] = [copy[index], copy[index - 1]];
 		parent.children = copy;
-		sections = [...sections];
-		notifyChange();
 	}
 
 	function moveChildDown(parentId: string, index: number) {
-		const parent = findSectionById(sections, parentId);
+		if (parentId === VIRTUAL_ROOT_ID) {
+			moveRootSectionDown(index);
+			return;
+		}
+		const parent = findSectionById(definition.sections, parentId);
 		if (!parent?.children || index >= parent.children.length - 1) return;
 		const copy = [...parent.children];
 		[copy[index], copy[index + 1]] = [copy[index + 1], copy[index]];
 		parent.children = copy;
-		sections = [...sections];
-		notifyChange();
 	}
 
 	function moveRootSectionUp(index: number) {
 		if (index <= 0) return;
-		const copy = [...sections];
+		const copy = [...definition.sections];
 		[copy[index - 1], copy[index]] = [copy[index], copy[index - 1]];
-		sections = copy;
-		notifyChange();
+		definition.sections = copy;
 	}
 
 	function moveRootSectionDown(index: number) {
-		if (index >= sections.length - 1) return;
-		const copy = [...sections];
+		if (index >= definition.sections.length - 1) return;
+		const copy = [...definition.sections];
 		[copy[index], copy[index + 1]] = [copy[index + 1], copy[index]];
-		sections = copy;
-		notifyChange();
-	}
-
-	function moveSectionInTree(args: { parentId: string | null; index: number }, direction: "up" | "down") {
-		if (args.parentId === null) {
-			if (direction === "up") moveRootSectionUp(args.index);
-			else moveRootSectionDown(args.index);
-		} else {
-			if (direction === "up") moveChildUp(args.parentId, args.index);
-			else moveChildDown(args.parentId, args.index);
-		}
+		definition.sections = copy;
 	}
 
 	function addFormToSection(sectionId: string) {
-		const section = findSectionById(sections, sectionId);
+		if (sectionId === VIRTUAL_ROOT_ID) return;
+		const section = findSectionById(definition.sections, sectionId);
 		if (!section) return;
 		const id = crypto.randomUUID();
 		const num = (section.forms?.length ?? 0) + 1;
@@ -181,24 +164,19 @@
 				fields: [],
 			},
 		};
-		if (!section.forms) section.forms = [];
-		section.forms = [...section.forms, newEntry];
-		sections = [...sections];
+		section.forms = [...(section.forms ?? []), newEntry];
 		selectedFormId = id;
-		notifyChange();
 	}
 
 	function deleteFormFromSection(sectionId: string, formId: string) {
-		const section = findSectionById(sections, sectionId);
+		const section = findSectionById(definition.sections, sectionId);
 		if (!section?.forms) return;
 		section.forms = section.forms.filter((f) => f.id !== formId);
-		sections = [...sections];
 		if (selectedFormId === formId) selectedFormId = null;
-		notifyChange();
 	}
 
 	function openFormEditor(sectionId: string, formId: string) {
-		const section = findSectionById(sections, sectionId);
+		const section = findSectionById(definition.sections, sectionId);
 		if (!section?.forms) return;
 		const entry = section.forms.find((f) => f.id === formId);
 		if (!entry) return;
@@ -208,28 +186,16 @@
 
 	function handleFormSave(updated: import("$lib/components/dynamic-forms/types").FormDefinition) {
 		if (!editingFormEntry) return;
+		const targetId = editingFormEntry.id;
 		function updateInSections(list: SectionDefinition[]): SectionDefinition[] {
 			return list.map((s) => ({
 				...s,
-				forms: s.forms?.map((f) => (f.id === editingFormEntry!.id ? { ...f, form: updated } : f)),
+				forms: s.forms?.map((f) => (f.id === targetId ? { ...f, form: updated } : f)),
 				children: s.children ? updateInSections(s.children) : undefined,
 			}));
 		}
-		sections = updateInSections(sections);
+		definition.sections = updateInSections(definition.sections);
 		editingFormEntry = null;
-		notifyChange();
-	}
-
-	function updateSection(updated: SectionDefinition) {
-		function replaceIn(list: SectionDefinition[]): SectionDefinition[] {
-			return list.map((s) =>
-				s.id === updated.id
-					? { ...updated, children: s.children, forms: s.forms }
-					: { ...s, children: s.children ? replaceIn(s.children) : undefined },
-			);
-		}
-		sections = replaceIn(sections);
-		notifyChange();
 	}
 
 	function updateFormEntry(updated: SectionFormEntry) {
@@ -240,8 +206,7 @@
 				children: s.children ? replaceIn(s.children) : undefined,
 			}));
 		}
-		sections = replaceIn(sections);
-		notifyChange();
+		definition.sections = replaceIn(definition.sections);
 	}
 </script>
 
@@ -250,34 +215,19 @@
 		<div class="flex h-full overflow-hidden bg-background {isFullscreen ? '' : 'min-h-[600px] rounded-lg border'}">
 			<!-- Left: Section Tree -->
 			<div class="w-60 shrink-0 border-r">
-				<div class="flex items-center justify-between border-b px-3 py-2.5">
+				<div class="border-b px-3 py-2.5">
 					<h3 class="text-sm font-semibold">Sections</h3>
-					<Button variant="ghost" size="icon" class="size-7" onclick={addRootSection}>
-						<FolderPlusIcon class="size-3.5" />
-					</Button>
 				</div>
 				<ScrollArea class="h-[calc(100%-41px)]">
 					<div class="p-2">
-						{#if sections.length === 0}
-							<div class="flex flex-col items-center py-8 text-center">
-								<LayoutListIcon class="mb-2 size-8 text-muted-foreground/50" />
-								<p class="text-xs text-muted-foreground">No sections yet</p>
-								<Button variant="outline" size="sm" class="mt-3 h-7 text-xs" onclick={addRootSection}>
-									<FolderPlusIcon class="mr-1.5 size-3" />
-									Add Section
-								</Button>
-							</div>
-						{:else}
-							<SectionTree
-								{sections}
-								{selectedSectionId}
-								{selectedFormId}
-								onselect={selectSection}
-								onselectform={selectForm}
-								onmovesectionup={(args) => moveSectionInTree(args, "up")}
-								onmovesectiondown={(args) => moveSectionInTree(args, "down")}
-							/>
-						{/if}
+						<SectionTree
+							sections={treeSections}
+							{selectedSectionId}
+							{selectedFormId}
+							virtualRootId={VIRTUAL_ROOT_ID}
+							onselect={selectSection}
+							onselectform={selectForm}
+						/>
 					</div>
 				</ScrollArea>
 			</div>
@@ -290,9 +240,8 @@
 						<input
 							id="structure-name-input"
 							class="min-w-0 flex-1 rounded-md border border-input bg-transparent px-2.5 py-1 text-sm font-semibold transition-colors outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary/30"
-							bind:value={structureName}
+							bind:value={definition.name}
 							placeholder="Untitled Structure"
-							oninput={notifyChange}
 						/>
 					</div>
 					<Button
@@ -316,6 +265,7 @@
 							<SectionCanvas
 								section={selectedSection}
 								{selectedFormId}
+								isVirtualRoot={isVirtualRootSelected}
 								onselectform={(formId) => selectForm(selectedSectionId!, formId)}
 								oneditform={(formId) => openFormEditor(selectedSectionId!, formId)}
 								ondeleteform={(formId) => deleteFormFromSection(selectedSectionId!, formId)}
@@ -325,6 +275,7 @@
 								ondeletechild={deleteSection}
 								onmovechildup={(i) => moveChildUp(selectedSectionId!, i)}
 								onmovechilddown={(i) => moveChildDown(selectedSectionId!, i)}
+								ondeletesection={() => deleteSection(selectedSectionId!)}
 							/>
 						{:else}
 							<div
@@ -332,13 +283,6 @@
 							>
 								<LayoutListIcon class="mb-3 size-10 text-muted-foreground/50" />
 								<p class="text-sm font-medium text-muted-foreground">Select a section from the tree</p>
-								<p class="mt-1 text-xs text-muted-foreground/75">Or add a new section to get started</p>
-								{#if sections.length === 0}
-									<Button variant="outline" size="sm" class="mt-4" onclick={addRootSection}>
-										<FolderPlusIcon class="mr-2 size-4" />
-										Add Section
-									</Button>
-								{/if}
 							</div>
 						{/if}
 					</div>
@@ -358,12 +302,17 @@
 								{allStateKeys}
 								onedit={() => openFormEditor(selectedSectionId!, selectedFormId!)}
 							/>
+						{:else if isVirtualRootSelected}
+							<div class="flex flex-col items-center justify-center py-12 text-center">
+								<LayersIcon class="mb-3 size-8 text-muted-foreground/50" />
+								<p class="text-sm font-medium text-muted-foreground">Structure root</p>
+								<p class="mt-1 text-xs text-muted-foreground/75">
+									This is a builder-only container. Sections you add here become the top-level steps of your structure
+									and won't appear as a section in the preview.
+								</p>
+							</div>
 						{:else if selectedSection}
-							<SectionConfig
-								bind:section={() => selectedSection!, (v) => updateSection(v)}
-								{allSectionIds}
-								{allStateKeys}
-							/>
+							<SectionConfig section={selectedSection} {allSectionIds} {allStateKeys} />
 						{:else}
 							<div class="flex flex-col items-center justify-center py-12 text-center">
 								<p class="text-sm text-muted-foreground">Select a section or form to edit its properties</p>

@@ -7,7 +7,6 @@
 	import NetworkIcon from "@lucide/svelte/icons/network";
 	import SettingsIcon from "@lucide/svelte/icons/settings";
 	import { SvelteFlowProvider, type Connection, type Edge, type Node } from "@xyflow/svelte";
-	import { untrack } from "svelte";
 	import GlobalStateEditor from "./global-state-editor.svelte";
 	import NodeConfig from "./node-config.svelte";
 	import NodePalette from "./node-palette.svelte";
@@ -22,21 +21,17 @@
 	import WorkflowCanvas from "./workflow-canvas.svelte";
 
 	let {
-		definition,
-		ondefinitionchange,
+		definition = $bindable(),
 	}: {
 		definition: WorkflowDefinition;
-		ondefinitionchange?: (definition: WorkflowDefinition) => void;
 	} = $props();
 
-	let workflowNodes = $state.raw<WorkflowNodeDefinition[]>(untrack(() => [...definition.nodes]));
-	let workflowEdges = $state.raw<WorkflowEdgeDefinition[]>(untrack(() => [...definition.edges]));
-	let globalState = $state.raw<GlobalVariable[]>(untrack(() => [...definition.globalState]));
-	let workflowName = $state(untrack(() => definition.name));
+	const workflowNodes = $derived(definition.nodes);
+	const workflowEdges = $derived(definition.edges);
+	const globalState = $derived(definition.globalState);
+
 	let selectedNodeId = $state<string | null>(null);
 	let showGlobalState = $state(false);
-
-	let changeCounter = $state(0);
 
 	const selectedNode = $derived(workflowNodes.find((n) => n.id === selectedNodeId) ?? null);
 
@@ -64,42 +59,22 @@
 		})),
 	);
 
-	$effect(() => {
-		const _count = changeCounter;
-		const snapshot: WorkflowDefinition = {
-			id: untrack(() => definition.id),
-			name: workflowName,
-			description: untrack(() => definition.description),
-			version: untrack(() => definition.version),
-			globalState: globalState.map((v) => ({ ...v })),
-			nodes: workflowNodes.map((n) => ({ ...n, config: { ...n.config } })),
-			edges: workflowEdges.map((e) => ({ ...e })),
-		};
-		if (_count === 0) return;
-		untrack(() => ondefinitionchange?.(snapshot));
-	});
-
-	function notifyChange() {
-		changeCounter++;
-	}
-
 	function addNode(type: NodeType, position?: { x: number; y: number }) {
 		const entry = nodeRegistry[type];
 		const id = crypto.randomUUID();
-		const count = workflowNodes.filter((n) => n.type === type).length + 1;
+		const count = definition.nodes.filter((n) => n.type === type).length + 1;
 
 		const newNode: WorkflowNodeDefinition = {
 			id,
 			type,
 			label: `${entry.label}${count > 1 ? ` ${count}` : ""}`,
-			position: position ?? { x: 250, y: workflowNodes.length * 150 + 50 },
+			position: position ?? { x: 250, y: definition.nodes.length * 150 + 50 },
 			config: { ...entry.defaultConfig },
 		};
 
-		workflowNodes = [...workflowNodes, newNode];
+		definition.nodes = [...definition.nodes, newNode];
 		selectedNodeId = id;
 		showGlobalState = false;
-		notifyChange();
 	}
 
 	function handleDrop(type: NodeType, position: { x: number; y: number }) {
@@ -109,8 +84,7 @@
 	function handleConnect(connection: Connection) {
 		const id = `e-${connection.source}-${connection.sourceHandle}-${connection.target}`;
 
-		// Prevent duplicate edges
-		if (workflowEdges.some((e) => e.id === id)) return;
+		if (definition.edges.some((e) => e.id === id)) return;
 
 		const newEdge: WorkflowEdgeDefinition = {
 			id,
@@ -119,8 +93,7 @@
 			sourceHandle: (connection.sourceHandle as "success" | "failure") ?? "success",
 		};
 
-		workflowEdges = [...workflowEdges, newEdge];
-		notifyChange();
+		definition.edges = [...definition.edges, newEdge];
 	}
 
 	function handleSelect(nodeId: string | null) {
@@ -129,20 +102,17 @@
 	}
 
 	function updateNode(updated: WorkflowNodeDefinition) {
-		workflowNodes = workflowNodes.map((n) => (n.id === updated.id ? updated : n));
-		notifyChange();
+		definition.nodes = definition.nodes.map((n) => (n.id === updated.id ? updated : n));
 	}
 
 	function deleteNode(nodeId: string) {
-		workflowNodes = workflowNodes.filter((n) => n.id !== nodeId);
-		workflowEdges = workflowEdges.filter((e) => e.source !== nodeId && e.target !== nodeId);
+		definition.nodes = definition.nodes.filter((n) => n.id !== nodeId);
+		definition.edges = definition.edges.filter((e) => e.source !== nodeId && e.target !== nodeId);
 		if (selectedNodeId === nodeId) selectedNodeId = null;
-		notifyChange();
 	}
 
 	function updateGlobalState(variables: GlobalVariable[]) {
-		globalState = variables;
-		notifyChange();
+		definition.globalState = variables;
 	}
 </script>
 
@@ -171,9 +141,8 @@
 						<input
 							id="workflow-name-input"
 							class="min-w-0 flex-1 rounded-md border border-input bg-transparent px-2.5 py-1 text-sm font-semibold transition-colors outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary/30"
-							bind:value={workflowName}
+							bind:value={definition.name}
 							placeholder="Untitled Workflow"
-							oninput={notifyChange}
 						/>
 					</div>
 					<Button

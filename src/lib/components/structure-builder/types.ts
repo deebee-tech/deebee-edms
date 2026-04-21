@@ -56,7 +56,7 @@ export interface SectionFormEntry {
 export interface SectionDefinition {
 	id: string;
 	title: string;
-	description?: string;
+	description?: string | null;
 	icon?: string;
 	children?: SectionDefinition[];
 	forms?: SectionFormEntry[];
@@ -66,7 +66,7 @@ export interface SectionDefinition {
 export interface StructureDefinition {
 	id: string;
 	name: string;
-	description?: string;
+	description?: string | null;
 	sections: SectionDefinition[];
 }
 
