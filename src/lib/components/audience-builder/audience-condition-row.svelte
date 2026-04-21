@@ -21,9 +21,7 @@
 
 	const tagType = $derived(catalog.tagTypes.find((t) => t.id === condition.tagTypeId));
 	const tagsForType = $derived<TagMeta[]>(catalog.tags.filter((t) => t.tagTypeId === condition.tagTypeId));
-	const selectedTag = $derived<TagMeta | undefined>(
-		tagsForType.find((t) => t.id === (condition.tagIds[0] ?? "")),
-	);
+	const selectedTag = $derived<TagMeta | undefined>(tagsForType.find((t) => t.id === (condition.tagIds[0] ?? "")));
 
 	function update(patch: Partial<AudienceCondition>) {
 		onchange({ ...condition, ...patch });

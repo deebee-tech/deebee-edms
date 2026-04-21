@@ -105,12 +105,8 @@
 
 	let latestSql = $state<{ dataSql: string; countSql: string } | null>(null);
 
-	const formattedLatestDataSql = $derived(
-		latestSql ? formatDisplaySql(latestSql.dataSql, "postgres") : "",
-	);
-	const formattedLatestCountSql = $derived(
-		latestSql ? formatDisplaySql(latestSql.countSql, "postgres") : "",
-	);
+	const formattedLatestDataSql = $derived(latestSql ? formatDisplaySql(latestSql.dataSql, "postgres") : "");
+	const formattedLatestCountSql = $derived(latestSql ? formatDisplaySql(latestSql.countSql, "postgres") : "");
 </script>
 
 {#snippet salarySnippet({ value }: { value: number })}

@@ -17,9 +17,7 @@
 	} = $props();
 
 	const generated = $derived(generateSql(definition));
-	const formattedRawSql = $derived(
-		formatDisplaySql(generated.rawSql, definition.engine ?? "postgres"),
-	);
+	const formattedRawSql = $derived(formatDisplaySql(generated.rawSql, definition.engine ?? "postgres"));
 </script>
 
 <Dialog.Root bind:open>

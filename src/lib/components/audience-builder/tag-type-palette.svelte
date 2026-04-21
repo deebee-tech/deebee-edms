@@ -30,9 +30,7 @@
 			.map((tt) => {
 				const allTags = catalog.tags.filter((t) => t.tagTypeId === tt.id);
 				const typeMatches = !query || tt.name.toLowerCase().includes(query);
-				const tags = query
-					? allTags.filter((t) => typeMatches || t.label.toLowerCase().includes(query))
-					: allTags;
+				const tags = query ? allTags.filter((t) => typeMatches || t.label.toLowerCase().includes(query)) : allTags;
 				return { tagType: tt, allTagsCount: allTags.length, tags };
 			})
 			.filter((section) => section.tags.length > 0);
@@ -51,10 +49,7 @@
 
 	function handleDragStart(event: DragEvent, tag: TagMeta) {
 		if (!event.dataTransfer) return;
-		event.dataTransfer.setData(
-			"application/audience-tag",
-			JSON.stringify({ tagTypeId: tag.tagTypeId, tagId: tag.id }),
-		);
+		event.dataTransfer.setData("application/audience-tag", JSON.stringify({ tagTypeId: tag.tagTypeId, tagId: tag.id }));
 		event.dataTransfer.effectAllowed = "copy";
 	}
 

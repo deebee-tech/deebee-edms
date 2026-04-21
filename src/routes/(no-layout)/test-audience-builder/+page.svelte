@@ -328,12 +328,7 @@
 							<CopyButton text={generatedSql.rawSql} />
 						</div>
 						<div class="relative min-h-[min(16rem,40vh)] overflow-hidden rounded-lg border">
-							<Code.Root
-								code={formattedAudienceRawSql}
-								lang="sql"
-								hideLines
-								class="max-h-[min(24rem,50vh)] border-0"
-							/>
+							<Code.Root code={formattedAudienceRawSql} lang="sql" hideLines class="max-h-[min(24rem,50vh)] border-0" />
 						</div>
 					</div>
 				</Card.Content>

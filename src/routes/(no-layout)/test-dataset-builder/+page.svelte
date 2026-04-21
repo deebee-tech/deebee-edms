@@ -21,9 +21,7 @@
 
 	const definitionJson = $derived(JSON.stringify(definition, null, 2));
 	const generatedSql = $derived(generateSql(definition));
-	const formattedGeneratedSql = $derived(
-		formatDisplaySql(generatedSql.sql, definition.engine ?? "postgres"),
-	);
+	const formattedGeneratedSql = $derived(formatDisplaySql(generatedSql.sql, definition.engine ?? "postgres"));
 
 	function handleDefinitionChange(updated: DatasetDefinition) {
 		definition = updated;

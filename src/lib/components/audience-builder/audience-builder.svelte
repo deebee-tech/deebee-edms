@@ -236,9 +236,7 @@
 									{#if gi > 0}
 										<div class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
 											<div class="h-px flex-1 bg-border"></div>
-											<span
-												class="rounded-full bg-primary/10 px-4 py-1 text-sm font-bold tracking-wider text-primary"
-											>
+											<span class="rounded-full bg-primary/10 px-4 py-1 text-sm font-bold tracking-wider text-primary">
 												OR
 											</span>
 											<div class="h-px flex-1 bg-border"></div>
